@@ -1,0 +1,127 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #32a852 60%, #a7ff3b);
+    margin: 0;
+    padding: 0;
+    color: #2e7d32;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 8px rgb(2, 157, 7);
+}
+
+.navbar .logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1b5e20;
+}
+
+.navbar .logout-btn {
+    padding: 10px 20px;
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.navbar .logout-btn:hover {
+    background: #1b5e20;
+}
+
+/* Container Styles */
+.container {
+    max-width: 800px;
+    margin: 80px auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+h1 {
+    font-size: 40px;
+}
+
+/* Quotes, Tips & Challenges */
+.quote, .tip, .challenge {
+    font-size: 24px;
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+.tip::before {
+    content: "💡 ";
+}
+
+.quote::before {
+    content: "";
+}
+
+.challenge {
+    display: inline-block;
+    background: linear-gradient(45deg, #32a852 60%, #a7ff3b);
+    padding: 20px 40px;
+    border-radius: 50px;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    margin: 30px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Stats & Badge */
+.stats {
+    margin-top: 40px;
+    font-size: 20px;
+}
+
+.badge {
+    font-size: 30px;
+    margin: 20px 0;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 24px;
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #1b5e20;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .navbar .logo {
+        margin-bottom: 10px;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    .quote, .tip, .challenge {
+        font-size: 20px;
+    }
+}
