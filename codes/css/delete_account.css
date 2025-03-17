@@ -1,0 +1,90 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg,rgb(11, 11, 11),rgb(8, 8, 8));
+    color: #333;
+}
+
+.container {
+    max-width: 400px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background: white;
+    text-align: center;
+}
+
+h2 {
+    color: #ff4d4d;
+    font-size: 28px;
+}
+
+p {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    text-decoration: none;
+    margin: 10px;
+}
+
+.btn-danger {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #e04343;
+}
+
+.btn-cancel {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #43a047;
+}
+
+/* Modal styling */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+}

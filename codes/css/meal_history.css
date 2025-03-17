@@ -1,0 +1,233 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #32a852 60%, #a7ff3b);
+    margin: 0;
+    padding: 0;
+    color: #2e7d32;
+    text-align: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 8px rgb(2, 157, 7);
+    position: relative;
+    z-index: 10;
+}
+
+.navbar .logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1b5e20;
+}
+
+.navbar .logout-btn {
+    padding: 10px 20px;
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.navbar .logout-btn:hover {
+    background: #1b5e20;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+h1 {
+    color: #1b5e20;
+    font-size: 36px;
+    margin-bottom: 30px;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 30%;
+    width: 40%;
+    height: 3px;
+    background-color: #8bc34a;
+    border-radius: 2px;
+}
+
+/* Meal Entry */
+.meal-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    padding: 15px;
+    background: #dafcd3;
+    border-radius: 8px;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.meal-entry:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background: #cefdbe;
+}
+
+.meal-info {
+    flex: 1; /* Takes up remaining space */
+    padding: 10px;
+}
+
+.meal-entry form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.btn {
+    padding: 15px 20px;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background: #1b5e20;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Search Bar */
+.search-bar {
+    margin-bottom: 20px;
+}
+
+.search-bar form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+input[type="text"] {
+    padding: 10px;
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Clear Button */
+.clear-btn {
+    background: #ff3b3b;
+}
+
+.clear-btn:hover {
+    background: #c62828;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Back Button */
+.back-btn {
+    display: block;
+    margin-top: 30px;
+    text-decoration: none;
+    font-weight: normal;
+    color: white;
+    background: #2e7d32;
+    padding: 10px 20px;
+    border-radius: 8px;
+    width: fit-content;
+    margin: 30px auto;
+}
+
+.back-btn:hover {
+    background: #1b5e20;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px 20px;
+    }
+
+    .navbar .logo {
+        margin-bottom: 10px;
+    }
+
+    .container {
+        margin: 30px 15px;
+        padding: 20px;
+    }
+
+    .meal-entry {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .meal-entry form {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Additional responsive styles for very small screens */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 10px 15px;
+    }
+    
+    h1 {
+        font-size: 30px;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    .search-bar form {
+        flex-direction: column;
+    }
+    
+    input[type="text"] {
+        width: 100%;
+    }
+    
+    .btn, .clear-btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}

@@ -1,0 +1,122 @@
+/* Dark Mode CSS */
+.dark-mode {
+    --text-color: #a5d6a7;
+    --text-light: #e0e0e0;
+    --background-light: #121212;
+    --card-bg: #1e3320;
+    --sidebar-bg: #1a1a1a;
+    --sidebar-active: #2c3e2d;
+    --sidebar-hover: #252e26;
+    --progress-bg: #333333;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode body {
+    background: linear-gradient(45deg, #1b5e20, 60%, #4c7d1e);
+}
+
+/* Dark mode specific override for challenge cards */
+.dark-mode .challenge-card {
+    background: #1e3320; /* Dark green background like the feature cards */
+    color: var(--text-light); /* Ensure text is light colored for readability */
+}
+
+/* Dark mode text color adjustments */
+.dark-mode .challenge-card h3,
+.dark-mode .challenge-card p,
+.dark-mode .challenge-meta,
+.dark-mode .challenge-progress {
+    color: var(--text-color);
+}
+
+/* Theme Toggle - Include these so the toggle works */
+.theme-toggle {
+    display: none;
+}
+
+.theme-switch {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.switch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    justify-content: space-between;
+}
+
+.mode-text {
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.slider {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: var(--transition-speed, 0.3s);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: var(--transition-speed, 0.3s);
+}
+
+.theme-toggle:checked + .sidebar .slider {
+    background-color: var(--primary-color, #32a852);
+}
+
+.theme-toggle:checked + .sidebar .slider:before {
+    transform: translateX(26px);
+}
+
+/* Add this to ensure basic transitions work if var isn't defined */
+:root {
+    --transition-speed: 0.3s;
+    --primary-color: #32a852;
+}
+
+/* Elements that need transitions for dark mode */
+body {
+    transition: background var(--transition-speed, 0.3s), color var(--transition-speed, 0.3s);
+}
+
+/* Theme toggle in navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.theme-switch {
+    display: flex;
+    align-items: center;
+}
+
+.slider-container {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+/* Ensure the toggle is visible without sidebar context */
+.theme-toggle:checked + .slider {
+    background-color: var(--primary-color, #32a852);
+}
+
+.theme-toggle:checked + .slider:before {
+    transform: translateX(26px);
+}

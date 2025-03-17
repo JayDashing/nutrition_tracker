@@ -1,0 +1,551 @@
+/* Keep existing body styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #32a852 60%, #a7ff3b);
+    margin: 0;
+    padding: 0;
+    color: #2e7d32;
+    box-sizing: border-box;
+    min-height: 100vh;
+}
+
+/* Keep existing navbar styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 50px;
+    background: rgba(255, 255, 255);
+    box-shadow: 0 4px 8px rgb(2, 157, 7);
+}
+
+.navbar .logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1b5e20;
+}
+
+/* Improved container styles */
+.container {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 30px 40px 40px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Add a subtle pattern overlay to container */
+h1 {
+    color: #1b5e20;
+    font-size: 36px;
+    margin-top: 10px;
+    margin-bottom: 60px;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 30%;
+    width: 40%;
+    height: 4px;
+    background-color: #8bc34a;
+    border-radius: 2px;
+}
+
+/* Improved tabs */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    border-bottom: none;
+    gap: 5px;
+}
+
+.tab {
+    padding: 12px 18px;
+    cursor: pointer;
+    border-radius: 20px;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+    background-color: #f1f8e9;
+    font-size: 15px;
+    color: #558b2f;
+}
+
+.tab:hover {
+    background-color: #dcedc8;
+}
+
+.tab.active {
+    background-color: #2e7d32;
+    color: white;
+    font-weight: 600;
+    border-bottom: none;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+}
+
+/* Improved form elements */
+form {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+input[type="text"], input[type="number"] {
+    padding: 14px 18px;
+    width: 80%;
+    border: 1px solid #c8e6c9;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+    border-color: #2e7d32;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.1);
+    outline: none;
+}
+
+.portion-controls {
+    display: flex;
+    gap: 15px;
+    width: 80%;
+}
+
+.portion-controls input {
+    flex: 1;
+    width: auto;
+}
+
+.portion-controls select {
+    padding: 14px 18px;
+    border: 1px solid #c8e6c9;
+    border-radius: 12px;
+    font-size: 16px;
+    background-color: white;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.portion-controls select:focus {
+    border-color: #2e7d32;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.1);
+    outline: none;
+}
+
+/* Keep existing button styles */
+.btn {
+    padding: 14px 28px;
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    background: #1b5e20;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Keep specified home button styles */
+.home-btn {
+    display: inline-block;
+    margin-top: 80px;
+    width: auto;
+    padding: 12px 24px;
+}
+
+/* Improve nutrition journal section */
+.nutrition-journal {
+    margin-top: 50px;
+    text-align: left;
+    background-color: #f9fbf7;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.journal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e8f5e9;
+}
+
+.journal-header h2 {
+    color: #1b5e20;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.calorie-summary {
+    display: flex;
+    gap: 15px;
+}
+
+.calorie-badge, .meal-count {
+    display: flex;
+    align-items: center;
+    background: #e8f5e9;
+    padding: 10px 18px;
+    border-radius: 30px;
+    color: #2e7d32;
+    font-weight: 600;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.calorie-badge i, .meal-count i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+/* Improve timeline styling */
+.journal-day {
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.day-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.date-circle {
+    width: 18px;
+    height: 18px;
+    background-color: #2e7d32;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.15);
+}
+
+.date-line {
+    width: 3px;
+    height: 100%;
+    background-color: #cefdbe;
+    margin-top: 5px;
+    position: absolute;
+    top: 18px;
+    height: calc(100% - 18px);
+}
+
+.day-date {
+    margin: 0;
+    color: #1b5e20;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Enhance meal entries */
+.journal-entry {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    padding: 18px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.journal-entry:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.entry-time {
+    min-width: 80px;
+    color: #689f38;
+    font-weight: 600;
+    font-size: 15px;
+    background-color: #f1f8e9;
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.entry-content {
+    flex-grow: 1;
+    margin-left: 15px;
+}
+
+.entry-content h4 {
+    margin: 0 0 8px 0;
+    color: #1b5e20;
+    font-size: 18px;
+}
+
+.entry-calories {
+    font-weight: 700;
+    color: #2e7d32;
+    font-size: 17px;
+    display: inline-block;
+    background-color: #e8f5e9;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-right: 10px;
+}
+
+.entry-portion {
+    display: inline-block;
+    color: #689f38;
+    font-size: 15px;
+}
+
+.entry-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: #ff5252;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    position: absolute;
+    right: 18px;
+    top: 18px;
+}
+
+.entry-delete:hover {
+    background: rgba(255, 82, 82, 0.15);
+    transform: rotate(90deg);
+}
+
+.entry-delete i {
+    font-size: 22px;
+}
+
+/* Improve tab content areas */
+.tab-content {
+    display: none;
+    background-color: #f9fbf7;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Food database tab improvements */
+.search-container {
+    margin-bottom: 25px;
+}
+
+#foodSearchInput {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #c8e6c9;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e8f5e9;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.food-item {
+    padding: 15px;
+    border-bottom: 1px solid #e8f5e9;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.food-item:hover {
+    background-color: #f1f8e9;
+}
+
+.food-item strong {
+    color: #2e7d32;
+    font-size: 16px;
+}
+
+/* Improve nutrient info display */
+.nutrient-info {
+    background: #f1f8e9;
+    padding: 25px;
+    border-radius: 14px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
+}
+
+.nutrient-info h3 {
+    margin-top: 0;
+    color: #1b5e20;
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.nutrient-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.nutrient-box {
+    background: white;
+    padding: 15px 10px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.nutrient-box:hover {
+    transform: translateY(-3px);
+}
+
+.nutrient-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2e7d32;
+    margin-bottom: 5px;
+}
+
+.nutrient-label {
+    font-size: 14px;
+    color: #689f38;
+}
+
+/* Foods found container styles */
+.foods-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.food-item-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid #e8f5e9;
+    transition: background-color 0.2s ease;
+}
+
+.food-item-result:last-child {
+    border-bottom: none;
+}
+
+.food-item-result:hover {
+    background-color: #f1f8e9;
+}
+
+.food-item-result .food-name {
+    flex: 2;
+    font-weight: 500;
+    color: #2e7d32;
+}
+
+.food-item-result .food-quantity {
+    flex: 1;
+    text-align: center;
+    color: #689f38;
+    font-size: 14px;
+}
+
+.food-item-result .food-calories {
+    flex: 1;
+    text-align: right;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.empty-journal {
+    text-align: center;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.error-message {
+    margin-top: 30px;
+    color:#ff5252;
+    font-weight: bold;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 40px 15px;
+    }
+    
+    .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab {
+        margin-bottom: 8px;
+    }
+    
+    .nutrient-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .journal-entry {
+        flex-direction: column;
+    }
+    
+    .entry-time {
+        margin-bottom: 10px;
+        align-self: flex-start;
+    }
+    
+    .entry-content {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+    
+    .entry-delete {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+}

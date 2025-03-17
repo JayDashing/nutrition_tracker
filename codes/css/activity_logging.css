@@ -1,0 +1,398 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #32a852 60%, #a7ff3b);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Navbar - keeping as requested */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 50px;
+    background: rgba(255, 255, 255);
+    box-shadow: 0 4px 8px rgb(2, 157, 7);
+    position: relative;
+    z-index: 10;
+}
+
+.navbar .logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1b5e20;
+}
+
+/* Container - improved with animation */
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Headings */
+h1 {
+    color: #1b5e20;
+    font-size: 38px;
+    margin-bottom: 30px;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 30%;
+    width: 40%;
+    height: 3px;
+    background-color: #8bc34a;
+    border-radius: 2px;
+}
+
+h2 {
+    color: #206a3b;
+    font-size: 28px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+p {
+    color: #206a3b;
+}
+
+.message {
+    margin: 15px 0;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 8px;
+    animation: messageAppear 0.5s ease-out;
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Form */
+form {
+    margin: 30px 0;
+}
+
+.input-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.input-group select,
+.input-group input {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid #206a3b;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.input-group select:focus,
+.input-group input:focus {
+    outline: none;
+    border-color: #8bc34a;
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Personal Details Group */
+.personal-details-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #f0ffe0;
+    border-radius: 10px;
+    border: 2px dashed #8bc34a;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.personal-details-group.active {
+    border: 2px solid #8bc34a;
+    background-color: #e8f5e9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.input-item label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #206a3b;
+    font-size: 16px;
+    text-align: left;
+    display: block;
+    width: 100%;
+}
+
+.input-item select,
+.input-item input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 45px;
+    padding: 12px;
+    border: 2px solid #206a3b;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.input-item select:focus,
+.input-item input:focus {
+    outline: none;
+    border-color: #8bc34a;
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Checkbox group */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    font-size: 16px;
+    color: #206a3b;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+}
+
+/* Buttons */
+.btn {
+    background: #206a3b;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    font-size: 16px;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    background: #16592c;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Back to home button - keeping as requested */
+.btn-container {
+    display: block;
+    margin-top: 40px;
+    text-decoration: solid;
+}
+
+/* Activity Entries */
+.activities-container {
+    margin: 20px 0;
+    width: 100%;
+}
+
+.activity-entry {
+    background: #dafcd3;
+    padding: 18px;
+    border-radius: 12px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.activity-entry:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    background: #cefdbe;
+}
+
+.activity-info {
+    font-size: 16px;
+    color: #206a3b;
+    text-align: left;
+    flex: 1;
+    line-height: 1.5;
+}
+
+.activity-info strong {
+    font-size: 18px;
+    color: #164a2b;
+}
+
+.activity-info small {
+    display: block;
+    margin-top: 6px;
+    color: #5a9b6d;
+}
+
+/* Delete Button */
+.delete-btn {
+    background: #206a3b;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    animation: none;
+}
+
+.delete-btn:hover {
+    background: #16592c;
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* Tooltip Styles */
+.info-tooltip {
+    position: relative;
+    display: inline-block;
+    margin-left: 8px;
+    cursor: help;
+    font-size: 18px;
+    color: #206a3b;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 280px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+    position: absolute;
+    z-index: 100;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -140px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(10px);
+    font-size: 14px;
+    font-weight: normal;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.info-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+    
+    .container {
+        margin: 30px 15px;
+        padding: 20px;
+    }
+    
+    .input-group {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    h1 {
+        font-size: 30px;
+    }
+    
+    h2 {
+        font-size: 24px;
+    }
+    
+    .personal-details-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .activity-entry {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .activity-entry form {
+        align-self: flex-end;
+        margin-top: 15px;
+    }
+    
+    .delete-btn {
+        margin-top: 10px;
+    }
+}
+
+/* Animations */
+@keyframes underlineExpand {
+    from {
+        width: 0;
+        left: 50%;
+    }
+    to {
+        width: 40%;
+        left: 30%;
+    }
+}

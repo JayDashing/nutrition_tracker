@@ -1,0 +1,8 @@
+{
+    "require": {
+        "phpmailer/phpmailer": "^6.9",
+        "psr/log": "^3.0",
+        "league/oauth2-client": "^2.8",
+        "clarifai/clarifai-php-grpc": "^11.2"
+    }
+}

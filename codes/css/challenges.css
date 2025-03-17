@@ -1,0 +1,328 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #32a852 60%, #a7ff3b);
+    margin: 0;
+    padding: 0;
+    color: #2e7d32;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 8px rgb(2, 157, 7);
+}
+
+.navbar .logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1b5e20;
+}
+
+/* Container Styles */
+.container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+h1 {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+/* Stats & Badge */
+.stats {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.badge {
+    font-size: 28px;
+    margin-bottom: 30px;
+}
+
+/* Challenges Container - Made Scrollable */
+.challenges-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Scrollbar styling */
+.challenges-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.challenges-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.challenges-container::-webkit-scrollbar-thumb {
+    background: #4caf50;
+    border-radius: 10px;
+}
+
+.challenges-container::-webkit-scrollbar-thumb:hover {
+    background: #2e7d32;
+}
+
+/* Challenge Cards */
+.challenge-card {
+    background: #f9f9f9;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.challenge-card.easy {
+    border-left: 5px solid #4caf50;
+}
+
+.challenge-card.medium {
+    border-left: 5px solid #ff9800;
+}
+
+.challenge-card.hard {
+    border-left: 5px solid #f44336;
+}
+
+.challenge-card.expert {
+    border-left: 5px solid #9c27b0;
+}
+
+.challenge-card.master {
+    border-left: 5px solid #1976d2;
+}
+
+.challenge-icon {
+    font-size: 35px;
+    margin-bottom: 15px;
+}
+
+.challenge-card h3 {
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #1b5e20;
+}
+
+.challenge-card p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.challenge-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.challenge-meta .duration {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.challenge-meta .difficulty {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.easy .difficulty {
+    background-color: #e8f5e9;
+    color: #4caf50;
+}
+
+.medium .difficulty {
+    background-color: #fff3e0;
+    color: #ff9800;
+}
+
+.hard .difficulty {
+    background-color: #ffebee;
+    color: #f44336;
+}
+
+.expert .difficulty {
+    background-color: #f3e5f5;
+    color: #9c27b0;
+}
+
+.master .difficulty {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.join-btn {
+    width: 100%;
+    padding: 10px 0;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.join-btn:hover {
+    background: #1b5e20;
+}
+
+/* Timer and Progress Bar Styles */
+.timer {
+    font-size: 16px;
+    color: #555;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.challenge-progress {
+    width: 100%;
+    background-color: #e0e0e0;
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #4caf50;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+/* Joined button style */
+.join-btn.joined {
+    background-color: #1b5e20;
+}
+
+/* Home Button */
+.btn {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 12px 24px;
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #1b5e20;
+}
+
+/* Additional styles for scrollable challenges container and timer */
+        .challenges-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .timer {
+            font-size: 16px;
+            color: #555;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .challenge-progress {
+            width: 100%;
+            background-color: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #4caf50;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+        
+        .challenge-card.expert {
+            border-left: 5px solid #9c27b0;
+        }
+        
+        .challenge-card.master {
+            border-left: 5px solid #1976d2;
+        }
+        
+        .expert .difficulty {
+            background-color: #f3e5f5;
+            color: #9c27b0;
+        }
+        
+        .master .difficulty {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .join-btn.completed {
+            background-color: #4caf50;
+        }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+    
+    .container {
+        padding: 20px;
+        margin: 30px 15px;
+    }
+    
+    .challenges-container {
+        grid-template-columns: 1fr;
+        max-height: 400px;
+    }
+    
+    h1 {
+        font-size: 30px;
+    }
+    
+    .badge {
+        font-size: 24px;
+    }
+}

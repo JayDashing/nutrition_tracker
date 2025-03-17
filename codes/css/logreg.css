@@ -1,0 +1,573 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  --primary-color: #32a852;
+  --primary-gradient: linear-gradient(to right, #32a852, #a7ff3b);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url('/nutrition_tracker/codes/images/logreg.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+.container {
+  width: 850px;
+  max-width: 95%;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  animation: container-appear 0.8s ease-out forwards;
+}
+
+@keyframes container-appear {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-wrapper {
+  width: 50%;
+  padding: 40px;
+  position: relative;
+}
+
+.form-wrapper.login-wrapper {
+  animation: slide-in-right 0.6s ease-out 0.4s both;
+}
+
+.form-wrapper.signup-wrapper {
+  background: var(--primary-gradient);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: slide-in-left 0.6s ease-out 0.4s both;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: fade-in 0.8s ease-out 0.8s both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.logo-container img {
+  max-width: 180px;
+  height: auto;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: #333;
+  animation: fade-in 0.8s ease-out 1s both;
+}
+
+.signup-wrapper .title {
+  color: #fff;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 25px;
+  animation: fade-in 0.5s ease-out calc(1.2s + var(--delay, 0s)) both;
+}
+
+.form-group:nth-child(1) { --delay: 0s; }
+.form-group:nth-child(2) { --delay: 0.1s; }
+.form-group:nth-child(3) { --delay: 0.2s; }
+.form-group:nth-child(4) { --delay: 0.3s; }
+
+.form-group input {
+  width: 100%;
+  padding: 12px 15px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: var(--transition);
+  background-color: #f8f8f8;
+}
+
+.form-group input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  background-color: #fff;
+}
+
+.form-group i.bxs-user,
+.form-group i.bxs-envelope,
+.form-group i.bxs-lock-alt {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #777;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  animation: fade-in 0.5s ease-out 1.6s both;
+}
+
+.form-check input {
+  margin-right: 8px;
+}
+
+.form-check label, .form-check a {
+  font-size: 14px;
+}
+
+.form-check a {
+  color: var(--primary-color);
+  text-decoration: none;
+  margin-left: auto;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  animation: fade-in 0.5s ease-out 1.8s both;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(50, 168, 82, 0.3);
+}
+
+.social-divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  animation: fade-in 0.5s ease-out 2s both;
+}
+
+.social-divider::before,
+.social-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.social-divider span {
+  padding: 0 15px;
+  color: #777;
+  font-size: 14px;
+}
+
+.social-login {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  animation: fade-in 0.5s ease-out 2.2s both;
+}
+
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.social-btn:hover {
+  transform: translateY(-3px);
+}
+
+.facebook { background: #1877F2; }
+.google { background: #EA4335; }
+.twitter { background: #1DA1F2; }
+
+.toggle-form {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #777;
+  text-align: center;
+  animation: fade-in 0.5s ease-out 2.4s both;
+}
+
+.toggle-form a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Sign up content */
+.signup-content {
+  text-align: center;
+}
+
+.signup-content h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #fff;
+  animation: fade-in 0.8s ease-out 1.2s both;
+}
+
+.signup-content p {
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.6;
+  animation: fade-in 0.8s ease-out 1.4s both;
+}
+
+.signup-btn {
+  background: #fff;
+  color: var(--primary-color);
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  transition: var(--transition);
+  animation: fade-in 0.8s ease-out 1.6s both;
+}
+
+.signup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+.error-message {
+  color: #ff3b30;
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.success-message {
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 35px;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  position: relative;
+  animation: modal-appear 0.4s ease-out forwards;
+}
+
+/* OTP Modal Styles */
+.otp-modal {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+}
+
+.otp-modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 35px;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  position: relative;
+  animation: modal-appear 0.4s ease-out forwards;
+  text-align: center;
+}
+
+.otp-title {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.otp-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.otp-inputs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.otp-input {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 24px;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.otp-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(50, 168, 82, 0.2);
+}
+
+.otp-timer {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-bottom: 20px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.resend-btn.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.verify-btn {
+  width: 100%;
+  max-width: 200px;
+  padding: 12px;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.verify-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(50, 168, 82, 0.3);
+}
+
+.verify-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.close {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.close:hover {
+  color: #333;
+  transform: rotate(90deg);
+}
+
+/* Forgot Password Modal Specific Styles */
+#forgotPasswordModal .modal-content,
+#resetSuccessModal .modal-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+#forgotPasswordModal .form-group {
+  margin: 25px 0;
+}
+
+#forgotPasswordModal .verify-btn,
+#resetSuccessModal .verify-btn {
+  margin-top: 20px;
+}
+
+#resetSpinner {
+  margin-top: 15px;
+}
+
+/* Success Message Animation */
+.success-fade {
+  animation: success-fade 0.3s ease-out forwards;
+}
+
+@keyframes success-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column-reverse;
+    max-width: 90%;
+  }
+  
+  .form-wrapper {
+    width: 100%;
+    padding: 30px 20px;
+  }
+  
+  .form-wrapper.signup-wrapper {
+    padding: 40px 20px;
+  }
+  
+  .title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  #signup-side {
+    display: none;
+  }
+  
+  .login-wrapper {
+    width: 100%;
+  }
+}

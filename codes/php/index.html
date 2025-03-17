@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition Tracker | NutriTrack</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="/nutrition_tracker/codes/css/index.css">
+</head>
+<body>
+    <!-- Home Section with Video Slider -->
+    <div id="home" class="video-container">
+        <video autoplay muted loop>
+            <source src="/nutrition_tracker/codes/images/welcome.mp4" type="video/mp4">
+        </video>
+        <video autoplay muted loop>
+            <source src="/nutrition_tracker/codes/images/welcome2.mp4" type="video/mp4">
+        </video>
+        <video autoplay muted loop>
+            <source src="/nutrition_tracker/codes/images/welcome3.mp4" type="video/mp4">
+        </video>
+    </div>
+    
+    <div class="indicators">
+        <span class="indicator active" data-index="0"></span>
+        <span class="indicator" data-index="1"></span>
+        <span class="indicator" data-index="2"></span>
+    </div>
+
+    <header>
+        <div class="logo">
+            <a href="logreg.php">
+                <img src="/nutrition_tracker/codes/images/logoname.png" alt="NutriTrack Logo">
+            </a>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#features">Features</a></li>
+            </ul>
+        </nav>
+        <a href="logreg.php" class="get-started">Get Started</a>
+        <div class="hamburger">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="text-content animate__animated animate__fadeIn">
+            <h1>Transform your journey with <span class="highlight"><br>NutriTrack</br></span></h1>
+            <p>Your ultimate companion for meal tracking, planning, fitness goal lists, and comprehensive nutrition management!</p>
+            <a href="logreg.php" class="btn animate__animated animate__pulse animate__infinite animate__slower">Start Tracking</a>
+        </div>
+    </div>
+
+    <!-- About Us Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2 class="section-title">About <span class="highlight">NutriTrack</span></h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p style="text-align: justify;"><span style="color: rgb(177, 205, 50);"><strong>NutriTrack</strong></span> was founded in 2025 with a simple mission: to help people take control of their nutrition and transform their health journey.</p>
+                    <p style="text-align: justify;">Our platform combines cutting-edge technology with nutritional science to provide you with the most comprehensive and user-friendly nutrition tracking experience available.</p>
+                    <p style="text-align: justify;">What sets us apart is our commitment to personalization. We understand that everyone's nutritional needs and goals are different, which is why we've designed NutriTrack to adapt to your unique requirements.</p>
+                    <p style="text-align: justify;">Whether you're looking to lose weight, build muscle, manage a health condition, or simply develop healthier eating habits, NutriTrack provides the tools and insights you need to succeed.</p>
+                    <a href="logreg.php" class="about-btn">Join Us Today</a>
+                </div>
+                <div class="about-image">
+                    <img src="/nutrition_tracker/codes/images/about-image.jpg" alt="Healthy Nutrition" class="about-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <h2 class="section-title">Our <span class="highlight">Features</span></h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class='bx bx-food-menu feature-icon'></i>
+                <h3>Meal Tracking</h3>
+                <p>Track your meals with our extensive food database, featuring thousands of items with detailed nutrition info.</p>
+            </div>
+            <div class="feature-card">
+                <i class='bx bx-bulb feature-icon'></i>
+                <h3>Tip Sharing</h3>
+                <p>Stay inspired on your health journey with insights and motivations to keep you motivated everyday.</p>
+            </div>
+            <div class="feature-card">
+                <i class='bx bx-target-lock feature-icon'></i>
+                <h3>Goal Setting</h3>
+                <p>Set personalized nutrition and fitness goals, and track your progress with detailed analytics and visualizations.</p>
+            </div>
+            <div class="feature-card">
+                <i class='bx bx-line-chart feature-icon'></i>
+                <h3>Progress Tracking</h3>
+                <p>Monitor your nutrition journey with comprehensive charts and reports that show your improvements over time.</p>
+            </div>
+            <div class="feature-card">
+                <i class='bx bx-trophy feature-icon'></i>
+                <h3>Community Challenges</h3>
+                <p>Join in daily challenges, earn badges, and stay motivated with fellow users.</p>
+            </div>
+            <div class="feature-card">
+                <i class='bx bx-share-alt feature-icon'></i>
+                <h3>Meal Sharing</h3>
+                <p>Share your favorite meals and recipes with the community, and discover new dishes from fellow members.</p>
+            </div>
+            <!-- Cards are cloned via JavaScript for the infinite scrolling effect -->
+        </div>
+    </div>
+</section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to start your nutrition journey?</h2>
+            <p>Join thousands of users who have transformed their health with NutriTrack</p>
+            <a href="logreg.php" class="cta-btn animate__animated animate__pulse animate__infinite animate__slower">Get Started Now</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="/nutrition_tracker/codes/images/logoname.png" alt="NutriTrack Logo" class="footer-logo-img">
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="logreg.php">Login/Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Contact Us</h4>
+                <p><i class='bx bx-envelope'></i> nutritrack2025@gmail.com</p>
+                <p><i class='bx bx-phone'></i> +639 499 187 557</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-instagram'></i></a>
+                    <a href="#"><i class='bx bxl-twitter'></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 NutriTrack | All Rights Reserved.
+        </div>
+    </footer>
+    <script src="/nutrition_tracker/codes/js/index.js"></script>
+</body>
+</html>
