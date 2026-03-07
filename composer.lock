@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "044eeba8eb8176d077c79b620aaaf12a",
+    "content-hash": "b7578d22d144c084124af55a01327102",
     "packages": [
         {
             "name": "clarifai/clarifai-php-grpc",

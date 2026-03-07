@@ -1,12 +1,9 @@
 <?php
 require_once 'db.php';
-
-// 1. SECURE SECRETS: Load from environment variables instead of hardcoding
 $admin_username = getenv('ADMIN_USERNAME') ?: 'nutriadmin';
 $raw_password = getenv('ADMIN_SETUP_PASSWORD');
 
 if (!$raw_password) {
-    // Stop execution if the environment variable is missing
     error_log("Security Alert: Setup attempted without ADMIN_SETUP_PASSWORD set.");
     die("Configuration error: Cannot proceed with setup.");
 }
@@ -14,12 +11,10 @@ if (!$raw_password) {
 $admin_password = password_hash($raw_password, PASSWORD_DEFAULT);
 $admin_role = 'admin';
 
-// 2. PREPARED STATEMENTS: Prevent SQL Injection
 $check_query = "SELECT id FROM users WHERE username = ?";
 $stmt = $conn->prepare($check_query);
 
 if (!$stmt) {
-    // 3. SECURE ERROR HANDLING: Log internally, show generic error to user
     error_log("Database prepare error on check_query: " . $conn->error);
     die("An internal system error occurred.");
 }
@@ -30,7 +25,7 @@ $stmt->store_result();
 
 if ($stmt->num_rows == 0) {
     $stmt->close();
-    
+
     $insert_query = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
     $insert_stmt = $conn->prepare($insert_query);
     
