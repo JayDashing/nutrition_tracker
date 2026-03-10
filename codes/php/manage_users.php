@@ -12,41 +12,66 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 require_once 'db.php';
 
 // Initialize search and sort parameters
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'id';
-$order = isset($_GET['order']) ? $_GET['order'] : 'ASC';
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$sort = $_GET['sort'] ?? 'id';
+$order = $_GET['order'] ?? 'ASC';
+
+$allowed_sort = ['id', 'username', 'email', 'role'];
+$allowed_order = ['ASC', 'DESC'];
+
+if (!in_array($sort, $allowed_sort)) {
+    $sort = 'id';
+}
+
+if (!in_array($order, $allowed_order)) {
+    $order = 'ASC';
+}
 
 // Handle delete user action
-if (isset($_GET['delete'])) {
-    $user_id = intval($_GET['delete']);
-    
-    // Check if user is an admin before deleting
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("CSRF attack detected");
+    }
+
+    $user_id = intval($_POST['delete']);
+
+    /* Prevent deleting yourself */
+    if ($user_id == $_SESSION['user_id']) {
+        $_SESSION['message'] = "You cannot delete your own account!";
+        $_SESSION['message_type'] = "error";
+        header("Location: manage_users.php");
+        exit();
+    }
+
+    /* Check role */
     $check_stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");
     $check_stmt->bind_param("i", $user_id);
     $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
-    $user_data = $check_result->fetch_assoc();
+    $result = $check_stmt->get_result();
+    $user = $result->fetch_assoc();
     $check_stmt->close();
-    
-    // Only proceed with deletion if the user is not an admin
-    if ($user_data && $user_data['role'] !== 'admin') {
+
+    if ($user && $user['role'] !== 'admin') {
+
         $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $stmt->close();
-        
-        // Set success message in session
+
         $_SESSION['message'] = "User deleted successfully!";
         $_SESSION['message_type'] = "success";
+
     } else {
-        // Set error message in session
+
         $_SESSION['message'] = "Admin users cannot be deleted!";
         $_SESSION['message_type'] = "error";
     }
-    
+
     header("Location: manage_users.php");
     exit();
 }
+
 
 // Prepare query with search and sort
 $query = "SELECT id, username, email, role FROM users";

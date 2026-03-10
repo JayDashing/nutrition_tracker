@@ -3,30 +3,45 @@ require 'db.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $conn->real_escape_string($_POST['username']);
+    $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $query = "SELECT * FROM users WHERE username='$username'";
-    $result = $conn->query($query);
+    $query = "SELECT * FROM users WHERE username = ?";
+    $stmt = $conn->prepare($query);
 
-    if ($result->num_rows == 1) {
-        $user = $result->fetch_assoc();
+    if ($stmt) {
+        $stmt->bind_param("s", $username);
 
-        if (password_verify($password, $user['password'])) {
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-            if ($user['role'] == 'admin') {
-                header("Location: dashboard.php");
+        if ($result->num_rows == 1) {
+            $user = $result->fetch_assoc();
+
+            if (password_verify($password, $user['password'])) {
+                // Prevent session fixation
+                session_regenerate_id(true);
+
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+
+                if ($user['role'] == 'admin') {
+                    header("Location: dashboard.php");
+                } else {
+                    header("Location: home.php");
+                }
+                exit();
             } else {
-                header("Location: home.php");
+                echo "Invalid username or password.";
             }
-            exit();
         } else {
-            echo "Invalid password.";
+            echo "Invalid username or password.";
         }
+        
+        $stmt->close();
     } else {
-        echo "User not found.";
+        error_log("Database error: " . $conn->error);
+        echo "An internal system error occurred.";
     }
 }
 ?>

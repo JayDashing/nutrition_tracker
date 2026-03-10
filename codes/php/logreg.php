@@ -4,6 +4,7 @@ session_start();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use ZxcvbnPhp\Zxcvbn;
 
 require __DIR__ . '/PHPMailer/Exception.php';
 require __DIR__ . '/PHPMailer/PHPMailer.php';
@@ -163,6 +164,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     
     if ($password !== $confirm_password) {
         $_SESSION['error'] = "Passwords do not match.";
+        header('Location: logreg.php');
+        exit;
+    }
+
+    //Password Policies
+    $uppercase = preg_match('@[A-Z]@', $password);
+    $lowercase = preg_match('@[a-z]@', $password);
+    $number    = preg_match('@[0-9]@', $password);
+    $specialChars = preg_match('@[^\w]@', $password); // Matches anything that isn't a letter or number
+
+    if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
+        $_SESSION['error'] = "Password must be at least 8 characters and include at least one uppercase letter, lowercase letter, number, and special character.";
+        header('Location: logreg.php');
+        exit;
+    }
+
+    $userData = [
+        $username,
+        $email,
+        'NutriTrack' 
+    ];
+
+    $zxcvbn = new Zxcvbn();
+    $strength = $zxcvbn->passwordStrength($password, $userData);
+
+    if ($strength['score'] < 3) {
+        $warning = !empty($strength['feedback']['warning'])
+            ? $strength['feedback']['warning']
+            : "The password is easy to guess.";
+        
+        if (!empty($strength['feedback']['suggestions'][0])) {
+            $warning .= " " . $strength['feedback']['suggestions'][0];
+        }
+        
+        $_SESSION['error'] = "(Score: " . $strength['score'] . "/4) " . $warning;
+
         header('Location: logreg.php');
         exit;
     }
@@ -349,13 +386,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                 
                 <div class="form-group">
                      <i class='bx bxs-lock-alt'></i>
-                     <input type="password" name="signup_password" id="signup_password" placeholder="Password (min. 8 characters)" required minlength="8">
+                     <input type="password" name="signup_password" id="signup_password" 
+                        placeholder="Password" 
+                        required 
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                        title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
                      <i class='bx bx-show password-toggle' onclick="togglePassword('signup_password', this)"></i>
                 </div>
                 
                 <div class="form-group">
                     <i class='bx bxs-lock-alt'></i>
-                    <input type="password" name="signup_confirm_password" id="signup_confirm_password" placeholder="Confirm Password" required>
+                    <input type="password" name="signup_confirm_password" id="signup_confirm_password" 
+                        placeholder="Confirm Password" 
+                        required
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                        title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
                     <i class='bx bx-show password-toggle' onclick="togglePassword('signup_confirm_password', this)"></i>
                 </div>
                 
