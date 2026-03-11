@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Redirect if user is not logged in or not an admin
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
@@ -8,9 +8,6 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
 }
 
 $username = $_SESSION['username'];
-
-// Database connection
-require_once 'db.php';
 
 // Get total number of reports/feedback
 $report_count_query = "SELECT COUNT(*) as total_reports FROM feedback";

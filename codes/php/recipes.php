@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -8,9 +8,6 @@ if (!isset($_SESSION['username'])) {
 }
 
 $username = $_SESSION['username'];
-
-//Database connection
-require_once 'db.php';
 
 // Sample recipes array (this would normally come from a database)
 $recipes = [

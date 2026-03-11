@@ -1,14 +1,12 @@
 <?php
-session_start();
+require_once 'init.php';
 // Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
     header("Location: logreg.php");
     exit();
 }
 
-// Database connection
-require_once 'db.php';
-
+verify_csrf();
 // Handle profile picture upload
 $upload_message = "";
 if (isset($_POST['upload_image'])) {
@@ -54,6 +52,19 @@ if (isset($_POST['upload_image'])) {
     // if everything is ok, try to upload file
     } else {
         if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $target_file)) {
+            
+            $old_pic_query = "SELECT profile_picture FROM users WHERE username = ?";
+            $old_stmt = $conn->prepare($old_pic_query);
+            $old_stmt->bind_param("s", $user_id);
+            $old_stmt->execute();
+            $old_result = $old_stmt->get_result();
+            if ($old_row = $old_result->fetch_assoc()) {
+                if (!empty($old_row['profile_picture']) && file_exists($old_row['profile_picture'])) {
+                    unlink($old_row['profile_picture']); // Deletes the old file from the server
+                }
+            }
+            $old_stmt->close();
+            
             // Update user's profile picture in database
             $update_query = "UPDATE users SET profile_picture = ? WHERE username = ?";
             $stmt = $conn->prepare($update_query);
@@ -100,6 +111,7 @@ $profile_pic = $user_data['profile_picture'] ? $user_data['profile_picture'] : "
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>NutriTrack | Profile</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
@@ -126,6 +138,7 @@ $profile_pic = $user_data['profile_picture'] ? $user_data['profile_picture'] : "
                     <input type="file" name="profile_picture" id="profile_picture" class="file-input">
                     <label for="profile_picture" class="file-label">Choose Image</label>
                 </div>
+                <?php echo csrf_field(); ?>
                 <button type="submit" name="upload_image" class="upload-btn"><i class="bx bx-check"></i> Upload</button>
             </form>
             
@@ -146,13 +159,20 @@ $profile_pic = $user_data['profile_picture'] ? $user_data['profile_picture'] : "
         
         <div class="btn-container">
             <a href="edit_profile.php" class="btn">Edit Profile</a>
-            <a href="#" class="btn delete-btn" onclick="confirmDelete()">Delete Account</a>
+            
+            <form id="delete-form" action="delete_account.php" method="POST" style="display: none;">
+                <?php echo csrf_field(); ?>
+            </form>
+            
+            <a href="#" class="btn delete-btn" onclick="confirmDelete(event)">Delete Account</a>
         </div>
-        
+
         <script>
-            function confirmDelete() {
+            function confirmDelete(event) {
+                event.preventDefault();
+                
                 if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-                    window.location.href = 'delete_account.php';
+                    document.getElementById('delete-form').submit();
                 }
             }
             
@@ -164,7 +184,6 @@ $profile_pic = $user_data['profile_picture'] ? $user_data['profile_picture'] : "
                 });
             });
         </script>
-        
         <a href="<?php echo ($user_data['role'] === 'admin') ? 'dashboard.php' : 'home.php'; ?>" class="btn home-btn">
          <?php echo ($user_data['role'] === 'admin') ? 'Back to Dashboard' : 'Back to Home'; ?>
         </a>

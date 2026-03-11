@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Check if user is an admin
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
@@ -7,8 +7,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Database connection
-require_once 'db.php';
+verify_csrf();
 
 $status_message = "";
 
@@ -78,6 +77,7 @@ $all_meals_result = $conn->query($all_meals_query);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Meal Database Admin | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -136,6 +136,7 @@ $all_meals_result = $conn->query($all_meals_query);
                                     <div class="meal-actions">
                                         <form method="POST">
                                             <input type="hidden" name="meal_id" value="<?php echo $meal['id']; ?>">
+                                            <?php echo csrf_field(); ?>
                                             <button type="submit" name="approve_meal" class="btn btn-approve">
                                                 <i class='bx bx-check'></i> Approve
                                             </button>
@@ -147,6 +148,7 @@ $all_meals_result = $conn->query($all_meals_query);
                                         
                                         <form method="POST" onsubmit="return confirmDelete()">
                                             <input type="hidden" name="meal_id" value="<?php echo $meal['id']; ?>">
+                                            <?php echo csrf_field(); ?>
                                             <button type="submit" name="delete_meal" class="btn btn-delete">
                                                 <i class='bx bx-trash'></i> Delete
                                             </button>
@@ -156,6 +158,7 @@ $all_meals_result = $conn->query($all_meals_query);
                                             <form method="POST">
                                                 <input type="hidden" name="meal_id" value="<?php echo $meal['id']; ?>">
                                                 <textarea name="rejection_reason" rows="3" placeholder="Reason for rejection (optional)" required></textarea>
+                                                <?php echo csrf_field(); ?>
                                                 <button type="submit" name="reject_meal" class="btn btn-reject">Confirm Rejection</button>
                                             </form>
                                         </div>
@@ -224,6 +227,7 @@ $all_meals_result = $conn->query($all_meals_query);
                                         <?php if ($meal['status'] === 'pending'): ?>
                                             <form method="POST">
                                                 <input type="hidden" name="meal_id" value="<?php echo $meal['id']; ?>">
+                                                <?php echo csrf_field(); ?>
                                                 <button type="submit" name="approve_meal" class="btn btn-approve">
                                                     <i class='bx bx-check'></i> Approve
                                                 </button>
@@ -236,6 +240,7 @@ $all_meals_result = $conn->query($all_meals_query);
                                         
                                         <form method="POST" onsubmit="return confirmDelete()">
                                             <input type="hidden" name="meal_id" value="<?php echo $meal['id']; ?>">
+                                            <?php echo csrf_field(); ?>
                                             <button type="submit" name="delete_meal" class="btn btn-delete">
                                                 <i class='bx bx-trash'></i> Delete
                                             </button>
@@ -246,6 +251,7 @@ $all_meals_result = $conn->query($all_meals_query);
                                             <form method="POST">
                                                 <input type="hidden" name="meal_id" value="<?php echo $meal['id']; ?>">
                                                 <textarea name="rejection_reason" rows="3" placeholder="Reason for rejection (optional)" required></textarea>
+                                                <?php echo csrf_field(); ?>
                                                 <button type="submit" name="reject_meal" class="btn btn-reject">Confirm Rejection</button>
                                             </form>
                                         </div>

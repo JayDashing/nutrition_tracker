@@ -1,6 +1,10 @@
 <?php
 require 'db.php';
 
+// protect sign‑up form from CSRF
+require_once 'init.php';
+verify_csrf();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $conn->real_escape_string($_POST['username']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);

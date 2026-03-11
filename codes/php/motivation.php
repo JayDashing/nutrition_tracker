@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,10 +7,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+verify_csrf();
 
-//Database connection
-require_once 'db.php';
+$username = $_SESSION['username'];
 
 //Get user's meal count and total calories
 $meal_query = "SELECT COUNT(*) as meal_count, SUM(calories) as total_calories FROM meals WHERE username = ?";
@@ -140,6 +139,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Motivation | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -211,7 +211,7 @@ $conn->close();
                 <label for="progress_description"><i class='bx bx-message-detail'></i> <strong>Share your journey</strong></label>
                 <textarea id="progress_description" name="progress_description" rows="4" placeholder="Tell us about your nutrition journey, goals, challenges, or achievements..." required></textarea>
             </div>
-            
+            <?php echo csrf_field(); ?>
             <button type="submit" name="share_progress" class="btn btn-share">Share My Progress</button>
         </form>
         

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,11 +7,10 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Logged-in user's name
+verify_csrf();
+
 $username = $_SESSION['username'];
 
-// Database connection
-require_once 'db.php';
 
 // Meal deletion
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_meal'])) {
@@ -88,6 +87,7 @@ $conn->close();
                 </div>
                 <form method="POST" style="margin: 0;">
                     <input type="hidden" name="delete_meal" value="<?php echo $meal['id']; ?>">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn">Delete</button>
                 </form>
             </div>

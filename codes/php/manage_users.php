@@ -1,7 +1,5 @@
 <?php
-// manage_users.php
-
-session_start();
+require_once 'init.php';
 
 // Redirect if not admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -9,7 +7,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-require_once 'db.php';
+verify_csrf();
 
 // Initialize search and sort parameters
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -94,6 +92,7 @@ $total_regular_users = $total_users - $total_admins;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>User Management | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

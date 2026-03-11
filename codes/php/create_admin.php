@@ -1,5 +1,5 @@
 <?php
-require_once 'db.php';
+require_once 'init.php';
 $admin_username = getenv('ADMIN_USERNAME') ?: 'nutriadmin';
 $raw_password = getenv('ADMIN_SETUP_PASSWORD');
 

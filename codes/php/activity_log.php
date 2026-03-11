@@ -1,7 +1,6 @@
 <?php
-session_start();
+require_once 'init.php';
 
-// Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
     header("Location: logreg.php");
     exit();
@@ -9,8 +8,7 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-// Database connection
-require_once 'db.php';
+verify_csrf();
 
 /**
  * Get calories burned from Nutritionix API
@@ -25,8 +23,8 @@ require_once 'db.php';
  */
 function getCaloriesBurned($activity_type, $duration, $gender = null, $weight = null, $height = null, $age = null) {
     // Nutritionix API credentials
-    $app_id = "14be65b6";
-    $app_key = "013362f3a3c7bcada7df574cb2fadf81";
+    $app_id = $_ENV['NUTRITIONIX_APP_ID'] ?? getenv('NUTRITIONIX_APP_ID');
+    $app_key = $_ENV['NUTRITIONIX_APP_KEY'] ?? getenv('NUTRITIONIX_APP_KEY');
    
     // API endpoint for exercise
     $endpoint = "https://trackapi.nutritionix.com/v2/natural/exercise";
@@ -53,6 +51,7 @@ function getCaloriesBurned($activity_type, $duration, $gender = null, $weight = 
    
     // Set cURL options
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
         'x-app-id: ' . $app_id,
@@ -81,7 +80,7 @@ function getCaloriesBurned($activity_type, $duration, $gender = null, $weight = 
     return false;
 }
 
-// Fetch user profile data from activities table
+// Fetch user profile data 
 $user_data = null;
 $fetch_user_data = "SELECT gender, weight_kg, height_cm, age FROM activities WHERE username = ? ORDER BY created_at DESC LIMIT 1";
 $stmt = $conn->prepare($fetch_user_data);
@@ -97,7 +96,7 @@ if ($stmt) {
 
 // Activity submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['activity_type'], $_POST['duration'])) {
-    $activity_type = $conn->real_escape_string($_POST['activity_type']);
+    $activity_type = $_POST['activity_type'];
     $duration = (int)$_POST['duration'];
     
     // Get user input data if provided
@@ -168,6 +167,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Activity Log | NutriTrack</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -237,7 +237,7 @@ $conn->close();
                     <span class="tooltip-text">Uses Nutritionix API to estimate calories burned based on activity type, duration, and your personal details.</span>
                 </span>
             </div>
-            
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn">Add Activity</button>
         </form>
 

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,11 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Logged-in user's name
 $username = $_SESSION['username'];
-
-// Database connection
-require_once 'db.php';
 
 // User's meal data
 $meals_query = "SELECT meal_name, calories, created_at FROM meals WHERE username = ? ORDER BY created_at DESC";

@@ -1,6 +1,7 @@
 <?php
-require 'db.php';
-session_start();
+require 'init.php';
+
+verify_csrf();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -272,6 +273,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>NutriTrack | Login & Register</title>
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/logreg.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -311,7 +313,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                     <label for="remember">Remember me</label>
                     <a href="#"><strong>Forgot Password?</strong></a>
                 </div>
-                
+                <?php echo csrf_field(); ?>
                 <button class="btn" type="submit" name="signin">Sign In</button>
             </form>
             
@@ -408,7 +410,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                     <input type="checkbox" name="terms" id="termsCheckbox" required>
                     <label for="termsCheckbox">I agree with the <a href="terms.php" target="_blank">Terms & Conditions</a></label>
                 </div>
-                
+                <?php echo csrf_field(); ?>
                 <button class="btn" type="submit" name="signup">Create Account</button>
             </form>
             
@@ -434,12 +436,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                     <input type="text" class="otp-input" name="otp[]" maxlength="1" pattern="[0-9]" required>
                 </div>
                 <div class="otp-timer">Code expires in: <span id="timer"><strong>5:00</strong></span></div>
-            
+            <?php echo csrf_field(); ?>
             <button type="submit" name="resend_otp" class="resend-btn" id="resend-btn">Resend Code</button>
             <div><button type="submit" name="verify_otp" class="verify-btn">Verify</button></div>
         </form>
     </div>
  </div>
+ <script src="/nutrition_tracker/codes/js/utils.js"></script>
  <script src="/nutrition_tracker/codes/js/logreg.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,10 +7,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+verify_csrf();
 
-//Database connection
-require_once 'db.php';
+$username = $_SESSION['username'];
 
 // Get user's total meals to personalize the page
 $meal_query = "SELECT COUNT(*) as meal_count FROM meals WHERE username = ?";
@@ -32,8 +31,8 @@ $conn->close();
  */
 function getNutritionInfo($query) {
     // Nutritionix API credentials
-    $app_id = "14be65b6";
-    $app_key = "013362f3a3c7bcada7df574cb2fadf81";
+    $app_id = $_ENV['NUTRITIONIX_APP_ID'] ?? getenv('NUTRITIONIX_APP_ID');
+    $app_key = $_ENV['NUTRITIONIX_APP_KEY'] ?? getenv('NUTRITIONIX_APP_KEY');
    
     // API endpoint for natural language processing
     $endpoint = "https://trackapi.nutritionix.com/v2/natural/nutrients";
@@ -424,6 +423,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['food_query'])) {
                     <form method="POST" action="">
                         <div class="search-input-container">
                             <input type="text" name="food_query" id="food_query" class="search-input" placeholder="Example: '1 large apple' or '2 eggs with toast'" value="<?php echo htmlspecialchars($foodQuery); ?>">
+                            <?php echo csrf_field(); ?>
                             <button type="submit" class="search-btn"><i class='bx bx-search'></i> Analyze</button>
                         </div>
                     </form>

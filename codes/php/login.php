@@ -2,6 +2,10 @@
 require 'db.php';
 session_start();
 
+// ensure POST requests include a valid CSRF token
+require_once 'init.php';
+verify_csrf();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];

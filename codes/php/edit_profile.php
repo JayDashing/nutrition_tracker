@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,8 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-//Database connection
-require_once 'db.php';
+verify_csrf();
 
 //User information
 $user = $_SESSION['username'];
@@ -59,6 +58,8 @@ $conn->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Edit Profile | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -128,7 +129,7 @@ $conn->close();
             <input type="password" id="password" name="password">
             <span class="focus-border"></span>
         </div>
-
+        <?php echo csrf_field(); ?>
         <div class="btn-container">
             <button type="submit" class="btn"><i class="fas fa-save" style="margin-right: 8px;"></i>Update Profile</button>
             <a href="profile.php" class="btn"><i class="fas fa-arrow-left" style="margin-right: 8px;"></i>Back to Profile</a>

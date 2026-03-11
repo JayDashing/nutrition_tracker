@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,11 +7,10 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Logged-in user's name
+verify_csrf();
+
 $username = $_SESSION['username'];
 
-// Database connection
-require_once 'db.php';
 
 // Meal deletion
 if (isset($_GET['delete_id'])) {
@@ -72,8 +71,8 @@ if (isset($_POST['add_custom_food'])) {
  */
 function getNutritionInfo($query) {
     // Nutritionix API credentials
-    $app_id = "14be65b6";
-    $app_key = "013362f3a3c7bcada7df574cb2fadf81";
+    $app_id = $_ENV['NUTRITIONIX_APP_ID'] ?? getenv('NUTRITIONIX_APP_ID');
+    $app_key = $_ENV['NUTRITIONIX_APP_KEY'] ?? getenv('NUTRITIONIX_APP_KEY');
     
     // API endpoint for natural language processing
     $endpoint = "https://trackapi.nutritionix.com/v2/natural/nutrients";
@@ -239,6 +238,7 @@ $stmt->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Track Your Meals | NutriTrack</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/meal_trackers.css">
@@ -280,6 +280,7 @@ $stmt->close();
                 </select>
             </div>
             <input type="hidden" name="food_id" value="0">
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn">Add Meal</button>
         </form>
     </div>
@@ -344,6 +345,7 @@ $stmt->close();
                 <input type="hidden" name="meal_name" id="foodName">
                 <input type="hidden" name="calories" id="calculatedCalories">
                 <input type="hidden" name="food_id" id="foodId">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn">Add to Journal</button>
             </form>
         </div>
@@ -366,6 +368,7 @@ $stmt->close();
                     <input type="number" name="custom_fat" placeholder="Fat (g) per 100g" step="0.1" min="0" required>
                 </div>
                 <input type="hidden" name="add_custom_food" value="1">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn">Add Custom Food</button>
             </form>
         </div>
@@ -376,6 +379,7 @@ $stmt->close();
         <form method="POST" action="" id="mealSearchForm">
             <div class="search-input-container">
                 <input type="text" name="meal_query" id="mealQueryInput" placeholder="(e.g., '2 eggs with toast and coffee')" required>
+                <?php echo csrf_field(); ?>
                 <button type="submit" name="search_meal" class="btn" style="margin-top: 10px;">Search</button>
             </div>
         </form>
@@ -432,6 +436,7 @@ $stmt->close();
                         <input type="hidden" name="portion_size" value="1">
                         <input type="hidden" name="portion_unit" value="serving">
                         <input type="hidden" name="food_id" value="0">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn">Add to Journal</button>
                     </form>
                 </div>

@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once 'init.php';
+verify_csrf();
 
 // Check if user is logged in
 if (!isset($_SESSION['username'])) {
@@ -17,11 +18,6 @@ if (!isset($_POST['water_count'])) {
 $username = $_SESSION['username'];
 $water_count = intval($_POST['water_count']);
 
-// Database connection
-$servername = "localhost";
-$db_username = "root";
-$password = "";
-$database = "nutrack_db";
 
 $conn = new mysqli($servername, $db_username, $password, $database);
 if ($conn->connect_error) {

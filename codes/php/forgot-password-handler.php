@@ -1,5 +1,5 @@
 <?php
-require 'db.php';
+require_once 'init.php';
 require 'PHPMailer/Exception.php';
 require 'PHPMailer/PHPMailer.php';
 require 'PHPMailer/SMTP.php';
@@ -8,6 +8,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 header('Content-Type: application/json');
+
+verify_csrf();
 
 function generateResetToken($length = 32) {
     return bin2hex(random_bytes($length));
@@ -20,8 +22,8 @@ function sendResetEmail($email, $resetToken) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'lourymarcu@gmail.com';
-        $mail->Password = 'zuifxkkefhflyqdi';
+        $mail->Username = $_ENV['SMTP_USER'] ?? getenv('SMTP_USER');
+        $mail->Password = $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS');
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 

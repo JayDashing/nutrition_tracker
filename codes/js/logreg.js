@@ -77,28 +77,6 @@ window.onclick = function(event) {
     }
 }
 
-// Handle send reset link
-sendResetLink.onclick = function() {
-    const email = document.getElementById('resetEmail').value;
-    
-    if (!email) {
-        alert('Please enter your email address');
-        return;
-    }
-
-    // Show loading spinner
-    resetSpinner.style.display = 'block';
-    sendResetLink.disabled = true;
-
-    // Simulate API call (replace with actual API call)
-    setTimeout(() => {
-        resetSpinner.style.display = 'none';
-        sendResetLink.disabled = false;
-        forgotPasswordModal.style.display = 'none';
-        resetSuccessModal.style.display = 'block';
-    }, 2000);
-}
-
 // Handle success OK button
 resetSuccessOk.onclick = function() {
     resetSuccessModal.style.display = 'none';
@@ -157,6 +135,7 @@ document.querySelector('button[name="verify_otp"]').addEventListener('click', fu
 });
 
 // Modify the existing script with these changes
+
 sendResetLink.onclick = function() {
     const email = document.getElementById('resetEmail').value;
     
@@ -175,6 +154,8 @@ sendResetLink.onclick = function() {
     // Show loading spinner
     resetSpinner.style.display = 'block';
     sendResetLink.disabled = true;
+
+    formData.append('csrf_token', getCsrfToken());
 
     // Create a FormData object to send the email
     const formData = new FormData();

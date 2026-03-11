@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -9,11 +9,10 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-//Database connection
-require_once 'db.php';
-
-// Process meal share form submission
 $share_message = "";
+
+verify_csrf();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     // Get user ID
     $user_id_query = "SELECT id FROM users WHERE username = ?";
@@ -199,6 +198,7 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Community | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -343,6 +343,8 @@ $conn->close();
                     <input type="file" id="meal_image" name="meal_image" accept=".jpg, .jpeg, .png" required>
                     <p class="file-help">Max size: 5MB. Only JPG, JPEG, PNG files allowed.</p>
                 </div>
+
+                <?php echo csrf_field(); ?>
                 
                 <div class="form-actions">
                     <button type="button" id="cancelShare" class="btn btn-cancel">Cancel</button>

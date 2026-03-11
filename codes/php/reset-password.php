@@ -1,6 +1,6 @@
 <?php
-session_start();
-require_once 'db.php';
+require_once 'init.php';
+verify_csrf();
 
 $token = '';
 $error = '';
@@ -77,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Reset Password | NutriTrack</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/reset-password.css">
@@ -113,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
                     <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm New Password" required>
                     <i class='bx bx-show password-toggle' onclick="togglePassword('confirm_password', this)"></i>
                 </div>
-
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn">Reset Password</button>
             </form>
         <?php endif; ?>

@@ -1,162 +1,103 @@
 <?php
-session_start();
+require_once 'init.php';
 
-// Redirect if user is not logged in
+// 1. Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
     header("Location: logreg.php");
     exit();
 }
 
-// Get the logged-in user's name
 $username = $_SESSION['username'];
+verify_csrf(); // Our bouncer at the door
 
-// Initialize user_created_at if not set
-if (!isset($_SESSION['user_created_at'])) {
-    $_SESSION['user_created_at'] = time();
-}
-
-// Initialize read_announcements array if not set
-if (!isset($_SESSION['read_announcements'])) {
-    $_SESSION['read_announcements'] = [];
-}
-
-// Initialize water intake in session if not set
-if (!isset($_SESSION['water_intake'])) {
-    $_SESSION['water_intake'] = 0;
-}
-
-// Database connection to get user data including profile picture
-$servername = "localhost";
-$db_username = "root";
-$password = "";
-$database = "nutrack_db";
-
-require_once 'db.php';
-
-// Update last_login for the current user
+// 2. Update last_login
 $update_login_time = "UPDATE users SET last_login = NOW() WHERE username = ?";
 $update_stmt = $conn->prepare($update_login_time);
 $update_stmt->bind_param("s", $username);
 $update_stmt->execute();
 $update_stmt->close();
 
-// Get user information from database
-$query = "SELECT email, profile_picture, last_login FROM users WHERE username = ?";
+// 3. Get user information
+$query = "SELECT email, profile_picture, last_login, created_at FROM users WHERE username = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $username);
 $stmt->execute();
-$result = $stmt->get_result();
+$user_data = $stmt->get_result()->fetch_assoc();
 
-if ($result->num_rows == 1) {
-    $user_data = $result->fetch_assoc();
+if ($user_data) {
     $userEmail = $user_data['email'];
-
-    // Default profile picture if none exists
-    $profile_pic = $user_data['profile_picture'] ? $user_data['profile_picture'] : "/nutrition_tracker/codes/images/default_profile.png";
-    $last_login = $user_data['last_login'] ? date('Y-m-d H:i:s', strtotime($user_data['last_login'])) : 'First login';
-
+    $profile_pic = $user_data['profile_picture'] ?: "/nutrition_tracker/codes/images/default_profile.png";
+    $account_created = strtotime($user_data['created_at']);
 } else {
-    
-    // Fallback values if user not found
     $userEmail = "user@example.com";
     $profile_pic = "/nutrition_tracker/codes/images/default_profile.png";
-    $last_login = 'N/A';
+    $account_created = time();
 }
-
 $stmt->close();
 
-// Get all announcements
-$announcements_query = "SELECT * FROM announcements ORDER BY created_at DESC";
-$announcements_result = $conn->query($announcements_query);
-
-// Get read announcements from database
+// 4. Announcements logic
+$announcements_result = $conn->query("SELECT * FROM announcements ORDER BY created_at DESC");
 $read_query = "SELECT announcement_id FROM announcement_reads WHERE username = ?";
 $read_stmt = $conn->prepare($read_query);
 $read_stmt->bind_param("s", $username);
 $read_stmt->execute();
-$read_result = $read_stmt->get_result();
+$read_res = $read_stmt->get_result();
 
-// Store read announcement IDs in session
-$_SESSION['read_announcements'] = [];
-if ($read_result && $read_result->num_rows > 0) {
-    while($row = $read_result->fetch_assoc()) {
-        $_SESSION['read_announcements'][] = $row['announcement_id'];
-    }
+$read_announcements = [];
+while($row = $read_res->fetch_assoc()) {
+    $read_announcements[] = $row['announcement_id'];
 }
 $read_stmt->close();
 
-// Count unread announcements
+// Count unread (we don't close the connection yet!)
 $unread_count = 0;
-if ($announcements_result && $announcements_result->num_rows > 0) {
-    // Store original position
-    $current_position = $announcements_result->current_field;
-    
+if ($announcements_result->num_rows > 0) {
     while($row = $announcements_result->fetch_assoc()) {
-        if (!in_array($row['id'], $_SESSION['read_announcements'])) {
-            $unread_count++;
-        }
+        if (!in_array($row['id'], $read_announcements)) $unread_count++;
     }
-    
-    // Reset the result pointer to beginning
     $announcements_result->data_seek(0);
 }
 
-$conn->close();
+// 5. FITNESS DATA (Using the same $conn!)
+// Fetch Daily Goal
+$query_goal = "SELECT goal_amount FROM goals WHERE username = ? AND goal_type = 'daily' ORDER BY created_at DESC LIMIT 1";
+$stmt_goal = $conn->prepare($query_goal);
+$stmt_goal->bind_param("s", $username);
+$stmt_goal->execute();
+$calorieGoal = $stmt_goal->get_result()->fetch_assoc()['goal_amount'] ?? 2000; // Default to 2000
+$stmt_goal->close();
 
-$conn2 = new mysqli($servername, $db_username, $password, $database);
-if ($conn2->connect_error) {
-    die("Connection failed: " . $conn2->connect_error);
-}
-
-// Fetch the user's most recent daily goal, if set
-$query_daily_goal = "SELECT goal_amount FROM goals WHERE username = ? AND goal_type = 'daily' ORDER BY created_at DESC LIMIT 1";
-$stmt2 = $conn2->prepare($query_daily_goal);
-$stmt2->bind_param("s", $username);
-$stmt2->execute();
-$res2 = $stmt2->get_result();
-if ($res2->num_rows > 0) {
-    $row_goal = $res2->fetch_assoc();
-    $calorieGoal = $row_goal['goal_amount'];
-} else {
-    // Fall back to a default if no goal is set
-    $calorieGoal = 0;
-}
-$stmt2->close();
-
-// Calculate total calories consumed today
-$sql_meals = "SELECT IFNULL(SUM(calories), 0) AS total_calories FROM meals WHERE username = ? AND DATE(created_at) = CURDATE()";
-$stmt_meals = $conn2->prepare($sql_meals);
+// Calculate Calories Consumed Today
+$sql_meals = "SELECT IFNULL(SUM(calories), 0) AS total FROM meals WHERE username = ? AND DATE(created_at) = CURDATE()";
+$stmt_meals = $conn->prepare($sql_meals);
 $stmt_meals->bind_param("s", $username);
 $stmt_meals->execute();
-$res_meals = $stmt_meals->get_result();
-$row_meals = $res_meals->fetch_assoc();
-$total_calories = $row_meals['total_calories'] ?? 0;
+$total_calories = $stmt_meals->get_result()->fetch_assoc()['total'];
 $stmt_meals->close();
 
-// Calculate total calories burned in activities today
-$sql_activities = "SELECT IFNULL(SUM(calories_burned), 0) AS total_burned FROM activities WHERE username = ? AND DATE(created_at) = CURDATE()";
-$stmt_activities = $conn2->prepare($sql_activities);
-$stmt_activities->bind_param("s", $username);
-$stmt_activities->execute();
-$res_activities = $stmt_activities->get_result();
-$row_activities = $res_activities->fetch_assoc();
-$total_burned = $row_activities['total_burned'] ?? 0;
-$stmt_activities->close();
+// Calculate Calories Burned Today
+$sql_burned = "SELECT IFNULL(SUM(calories_burned), 0) AS total FROM activities WHERE username = ? AND DATE(created_at) = CURDATE()";
+$stmt_burned = $conn->prepare($sql_burned);
+$stmt_burned->bind_param("s", $username);
+$stmt_burned->execute();
+$total_burned = $stmt_burned->get_result()->fetch_assoc()['total'];
+$stmt_burned->close();
 
-$conn2->close();
+// 6. WATER INTAKE (Now persistent from Database)
+$sql_water = "SELECT glasses FROM water_intake WHERE username = ? AND DATE(created_at) = CURDATE()";
+$stmt_water = $conn->prepare($sql_water);
+$stmt_water->bind_param("s", $username);
+$stmt_water->execute();
+$waterIntake = $stmt_water->get_result()->fetch_assoc()['glasses'] ?? 0;
+$stmt_water->close();
 
-// Calculate net calories and the progress percentage
+// Calculations
 $net_calories = $total_calories - $total_burned;
 $caloriePercentage = ($calorieGoal > 0) ? min(($net_calories / $calorieGoal) * 100, 100) : 0;
-
-// Get water intake from session
-$waterIntake = $_SESSION['water_intake'];
 $waterGoal = 8;
-
-// Calculate water intake percentage
 $waterPercentage = min(($waterIntake / $waterGoal) * 100, 100);
 
-// Random nutrition tips
+// 7. Nutrition Tips
 $nutrition_tips = [
     "An apple a day keeps the doctor away! 🍏",
     "Stay hydrated - Drink at least 8 glasses of water a day! 💧",
@@ -167,16 +108,11 @@ $nutrition_tips = [
     "Balance your meals with carbs, proteins, and healthy fats. 🍽️",
     "Healthy eating is a journey, not a race. Take small steps every day! 🚶‍♂️",
     "Fuel your body with nutritious foods and feel the difference! ⚡",
-    "Every bite is an opportunity to nourish your body and mind! 🧠",
-    "Good nutrition is a foundation for a healthier, happier life! 😊",
-    "Color your plate with a variety of fruits and veggies every day! 🌈",
-    "Your body deserves the best – feed it with love and care! ❤️",
-    "A healthy outside starts from the inside – eat well and thrive! 🌟",
-    "Smart choices today create a healthier tomorrow! 💪"
+    "Every bite is an opportunity to nourish your body and mind! 🧠"
 ];
-
-// Pick a random tip
 $random_tip = $nutrition_tips[array_rand($nutrition_tips)];
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -185,6 +121,7 @@ $random_tip = $nutrition_tips[array_rand($nutrition_tips)];
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>NutriTrack | Dashboard</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -516,6 +453,7 @@ $random_tip = $nutrition_tips[array_rand($nutrition_tips)];
     <!-- Save Water Intake via AJAX -->
     <form id="water-form" style="display: none">
         <input type="hidden" name="water_count" id="water-count" value="<?php echo $waterIntake; ?>">
+        <?php echo csrf_field(); ?>
     </form>
     <script src="/nutrition_tracker/codes/js/home.js"></script>
 </body>

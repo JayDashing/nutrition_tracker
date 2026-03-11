@@ -1,6 +1,5 @@
 <?php
-session_start();
-
+require_once 'init.php';
 // Redirect if user is not logged in or not an admin
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     header("Location: logreg.php");
@@ -8,9 +7,6 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
 }
 
 $username = $_SESSION['username'];
-
-// Database connection
-require_once 'db.php';
 
 // Get user stats
 $user_count_query = "SELECT COUNT(*) as total_users FROM users";
@@ -134,6 +130,7 @@ $total_stats = $total_stats_result->fetch_assoc();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>User Nutrition Analysis | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
