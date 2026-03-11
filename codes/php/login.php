@@ -1,8 +1,4 @@
 <?php
-require 'db.php';
-session_start();
-
-// ensure POST requests include a valid CSRF token
 require_once 'init.php';
 verify_csrf();
 

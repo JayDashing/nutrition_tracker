@@ -1,7 +1,4 @@
 <?php
-require 'db.php';
-
-// protect sign‑up form from CSRF
 require_once 'init.php';
 verify_csrf();
 
