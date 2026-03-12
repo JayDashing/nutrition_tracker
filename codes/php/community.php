@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     
     $target_dir = "uploads/meals/";
     if (!file_exists($target_dir)) {
-        mkdir($target_dir, 0777, true);
+        mkdir($target_dir, 0755, true);
     }
     
     $file_extension = strtolower(pathinfo($_FILES["meal_image"]["name"], PATHINFO_EXTENSION));
@@ -41,16 +41,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     
     $uploadOk = 1;
     
-    // Check file size
-    if ($_FILES["meal_image"]["size"] > 5000000) { // 5MB max
-        $share_message = "Sorry, your file is too large.";
+    // Check if file was uploaded
+    if(!isset($_FILES["meal_image"]) || $_FILES["meal_image"]["error"] !== UPLOAD_ERR_OK) {
+        $share_message = "No file uploaded or upload error occurred.";
         $uploadOk = 0;
     }
     
-    // Allow certain file formats
-    if($file_extension != "jpg" && $file_extension != "png" && $file_extension != "jpeg") {
-        $share_message = "Sorry, only JPG, JPEG, PNG files are allowed.";
+    // Validate MIME type
+    if ($uploadOk == 1) {
+        $allowed_mime_types = ['image/jpeg', 'image/png'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES["meal_image"]["tmp_name"]);
+        finfo_close($finfo);
+        
+        if (!in_array($mime_type, $allowed_mime_types)) {
+            $share_message = "Invalid file type. Only JPG, JPEG, PNG images are allowed.";
+            $uploadOk = 0;
+        }
+    }
+    
+    // Check if image file is an actual image using getimagesize
+    if ($uploadOk == 1) {
+        $check = getimagesize($_FILES["meal_image"]["tmp_name"]);
+        if($check === false) {
+            $share_message = "File is not a valid image.";
+            $uploadOk = 0;
+        }
+    }
+    
+    // Check file size (5MB max)
+    if ($uploadOk == 1 && $_FILES["meal_image"]["size"] > 5000000) {
+        $share_message = "Sorry, your file is too large. Maximum size is 5MB.";
         $uploadOk = 0;
+    }
+    
+    // Allow certain file formats (case-insensitive)
+    if ($uploadOk == 1) {
+        $allowed_extensions = ['jpg', 'jpeg', 'png'];
+        if (!in_array($file_extension, $allowed_extensions)) {
+            $share_message = "Sorry, only JPG, JPEG, PNG files are allowed.";
+            $uploadOk = 0;
+        }
     }
     
     // Check if $uploadOk is set to 0 by an error
