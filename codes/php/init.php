@@ -1,6 +1,7 @@
 <?php
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
+ini_set('session.use_strict_mode', 1);
 
 session_start();
 
@@ -33,7 +34,9 @@ try {
 
 function verify_csrf() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        if (!isset($_POST['csrf_token']) ||
+            !isset($_SESSION['csrf_token']) ||
+            !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
             
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
             error_log("CSRF validation failed for IP: $ip");

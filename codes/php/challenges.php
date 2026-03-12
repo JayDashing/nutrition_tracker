@@ -143,7 +143,6 @@ $master_challenges = [
     ]
 ];
 
-//Total challenges completed (changed from 2 to 0)
 $completed_challenges = 0;
 
 //Achievement Badges for challenges
