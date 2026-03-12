@@ -14,36 +14,56 @@ if (isset($_POST['upload_image'])) {
     
     // Create directory if it doesn't exist
     if (!file_exists($target_dir)) {
-        mkdir($target_dir, 0777, true);
+        mkdir($target_dir, 0755, true);
     }
     
     $user_id = $_SESSION['username'];
-    $file_extension = pathinfo($_FILES["profile_picture"]["name"], PATHINFO_EXTENSION);
+    $file_extension = strtolower(pathinfo($_FILES["profile_picture"]["name"], PATHINFO_EXTENSION));
     $new_filename = $user_id . "_" . time() . "." . $file_extension;
     $target_file = $target_dir . $new_filename;
     $uploadOk = 1;
     
-    // Check if image file is an actual image
-    if(isset($_FILES["profile_picture"])) {
+    // Check if file was uploaded
+    if(!isset($_FILES["profile_picture"]) || $_FILES["profile_picture"]["error"] !== UPLOAD_ERR_OK) {
+        $upload_message = "No file uploaded or upload error occurred.";
+        $uploadOk = 0;
+    }
+    
+    // Validate MIME type
+    if ($uploadOk == 1) {
+        $allowed_mime_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES["profile_picture"]["tmp_name"]);
+        finfo_close($finfo);
+        
+        if (!in_array($mime_type, $allowed_mime_types)) {
+            $upload_message = "Invalid file type. Only JPG, PNG & GIF images are allowed.";
+            $uploadOk = 0;
+        }
+    }
+    
+    // Check if image file is an actual image using getimagesize
+    if ($uploadOk == 1) {
         $check = getimagesize($_FILES["profile_picture"]["tmp_name"]);
-        if($check !== false) {
-            $uploadOk = 1;
-        } else {
-            $upload_message = "File is not an image.";
+        if($check === false) {
+            $upload_message = "File is not a valid image.";
             $uploadOk = 0;
         }
     }
     
     // Check file size (5MB max)
-    if ($_FILES["profile_picture"]["size"] > 5000000) {
-        $upload_message = "Sorry, your file is too large.";
+    if ($uploadOk == 1 && $_FILES["profile_picture"]["size"] > 5000000) {
+        $upload_message = "Sorry, your file is too large. Maximum size is 5MB.";
         $uploadOk = 0;
     }
     
-    // Allow certain file formats
-    if($file_extension != "jpg" && $file_extension != "png" && $file_extension != "jpeg" && $file_extension != "gif" ) {
-        $upload_message = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-        $uploadOk = 0;
+    // Allow certain file formats (case-insensitive)
+    if ($uploadOk == 1) {
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+        if (!in_array($file_extension, $allowed_extensions)) {
+            $upload_message = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+            $uploadOk = 0;
+        }
     }
     
     // Check if $uploadOk is set to 0 by an error

@@ -89,6 +89,15 @@ function sendOTP($email, $otp) {
 
 // Handle OTP Verification
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
+    // Rate limiting for OTP verification (5 attempts per 15 minutes)
+    $rate_check = check_rate_limit('otp_verify', 5, 300);
+    if (!$rate_check['allowed']) {
+        $minutes = ceil($rate_check['retry_after'] / 60);
+        $_SESSION['error'] = "Too many failed verification attempts. Please try again in $minutes minutes.";
+        header('Location: logreg.php?show_otp=true');
+        exit;
+    }
+    
     $entered_otp = implode('', $_POST['otp']);
     $stored_otp = $_SESSION['registration_otp'];
     $stored_otp_time = $_SESSION['registration_otp_time'];
@@ -101,6 +110,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
     }
     
     if ($entered_otp === $stored_otp) {
+        // Clear rate limit on successful verification
+        clear_rate_limit('otp_verify');
+        
         // Complete registration process
         $username = $_SESSION['temp_username'];
         $email = $_SESSION['temp_email'];
@@ -129,6 +141,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
             exit;
         }
     } else {
+        // Record failed attempt
+        record_rate_limit('otp_verify');
         $_SESSION['error'] = 'Invalid OTP. Please try again.';
         header('Location: logreg.php?show_otp=true');
         exit;
@@ -137,6 +151,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
 
 // Resend OTP
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['resend_otp'])) {
+    // Rate limiting for OTP resend (3 attempts per 15 minutes)
+    $rate_check = check_rate_limit('otp_resend', 3, 300);
+    if (!$rate_check['allowed']) {
+        $minutes = ceil($rate_check['retry_after'] / 60);
+        $_SESSION['error'] = "Too many resend attempts. Please try again in $minutes minutes.";
+        header('Location: logreg.php?show_otp=true');
+        exit;
+    }
+    
+    record_rate_limit('otp_resend');
+    
     $new_otp = generateOTP();
     $_SESSION['registration_otp'] = $new_otp;
     $_SESSION['registration_otp_time'] = time();
@@ -241,6 +266,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
 
 // Sign-In
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
+    // Rate limiting for login (5 attempts per 15 minutes)
+    $rate_check = check_rate_limit('login', 5, 300);
+    if (!$rate_check['allowed']) {
+        $minutes = ceil($rate_check['retry_after'] / 60);
+        $_SESSION['error'] = "Too many failed login attempts. Please try again in $minutes minutes.";
+        header('Location: logreg.php');
+        exit;
+    }
+    
     $identifier = $conn->real_escape_string($_POST['signin_identifier']);
     $password = $_POST['signin_password'];
 
@@ -254,6 +288,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         $user = $result->fetch_assoc();
 
         if (password_verify($password, $user['password'])) {
+            // Clear rate limit on successful login
+            clear_rate_limit('login');
+            
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
             
@@ -262,6 +299,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         }
     }
     
+    // Record failed login attempt
+    record_rate_limit('login');
     $_SESSION['error'] = "Invalid username/email or password.";
     header('Location: logreg.php');
     exit;
