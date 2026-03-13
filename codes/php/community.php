@@ -27,9 +27,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     // Process file upload
     $meal_name = htmlspecialchars($_POST['meal_name']);
     $meal_description = htmlspecialchars($_POST['meal_description']);
-    $calories = (int)$_POST['calories'];
+    $raw_calories = $_POST['calories'];
+    $uploadOk = 1;
+    
+
     $status = "pending"; // Default status is pending for admin approval
     
+        if (filter_var($raw_calories, FILTER_VALIDATE_INT) === false || $raw_calories < 0 || $raw_calories > 10000) {
+        $share_message = "Invalid calorie amount. Please enter a value between 0 and 10,000.";
+        $uploadOk = 0; 
+    } else {
+        $calories = (int)$raw_calories;
+    }
+
     $target_dir = "uploads/meals/";
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0755, true);
@@ -38,8 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     $file_extension = strtolower(pathinfo($_FILES["meal_image"]["name"], PATHINFO_EXTENSION));
     $new_filename = uniqid() . "." . $file_extension;
     $target_file = $target_dir . $new_filename;
-    
-    $uploadOk = 1;
     
     // Check if file was uploaded
     if(!isset($_FILES["meal_image"]) || $_FILES["meal_image"]["error"] !== UPLOAD_ERR_OK) {
