@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { zxcvbn } from 'zxcvbn';
+import zxcvbn from 'zxcvbn';
 
 export async function hashPassword(password) {
   const salt = await bcrypt.genSalt(10);
