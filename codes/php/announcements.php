@@ -7,9 +7,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
-
 verify_csrf();
+
+$username = $_SESSION['username'];
 
 // Handle announcement submission
 $announcement_message = "";
