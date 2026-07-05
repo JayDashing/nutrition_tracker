@@ -92,6 +92,9 @@ function togglePassword(inputId, icon) {
 }
 
 function getCsrfToken() {
+    if (window.csrfToken) {
+        return window.csrfToken;
+    }
     const metaTag = document.querySelector('meta[name="csrf-token"]');
     return metaTag ? metaTag.getAttribute('content') : '';
 }
@@ -122,6 +125,7 @@ if (loginForm) {
 
         const response = await fetch('/api/auth/login', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -174,6 +178,7 @@ if (signupForm) {
 
         const response = await fetch('/api/auth/register', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -205,6 +210,7 @@ if (sendResetLink) {
 
         const response = await fetch('/api/auth/forgot-password', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, csrf_token: getCsrfToken() })
         });
