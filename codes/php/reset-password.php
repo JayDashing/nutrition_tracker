@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
         $error = "Both password fields are required.";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
-    } elseif (strlen($password) < 8) {
-        $error = "Password must be at least 8 characters long.";
+    } elseif (strlen($password) < 8 || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^\w]/', $password)) {
+        $error = "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
     } else {
         // Hash the new password
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
@@ -105,13 +105,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
 
                 <div class="form-group">
                     <i class='bx bxs-lock-alt'></i>
-                    <input type="password" name="password" id="password" placeholder="New Password" required>
+                    <input type="password" name="password" id="password" placeholder="New Password" required
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                        title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
                     <i class='bx bx-show password-toggle' onclick="togglePassword('password', this)"></i>
                 </div>
 
                 <div class="form-group">
                     <i class='bx bxs-lock-alt'></i>
-                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm New Password" required>
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm New Password" required
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                        title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
                     <i class='bx bx-show password-toggle' onclick="togglePassword('confirm_password', this)"></i>
                 </div>
                 <?php echo csrf_field(); ?>

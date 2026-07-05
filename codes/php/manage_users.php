@@ -179,10 +179,13 @@ $total_regular_users = $total_users - $total_admins;
                     </td>
                     <td class="action-btns">
                         <?php if ($row['role'] !== 'admin'): ?>
-                            <a href="?delete=<?php echo $row['id']; ?>" class="btn action-btn danger-btn" title="Delete User" 
-                               onclick="return confirm('Are you sure you want to delete this user?');">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
+                            <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                <?php echo csrf_field(); ?>
+                                <input type="hidden" name="delete" value="<?php echo $row['id']; ?>">
+                                <button type="submit" class="btn action-btn danger-btn" title="Delete User">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
                         <?php else: ?>
                             <span class="btn action-btn disabled-btn" title="Admin users cannot be deleted">
                             <i class="fas fa-lock" style="color: grey;"></i>

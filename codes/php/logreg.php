@@ -36,7 +36,7 @@ function sendOTP($email, $otp) {
             )
         );
 
-        $mail->setFrom('nutritrack2025@gmail.com', 'NutriTrack');
+        $mail->setFrom('hanazonodatabase@gmail.com', '09097284445xd');
         $mail->addAddress($email);
         
         $mail->isHTML(true);

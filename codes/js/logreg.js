@@ -155,24 +155,35 @@ sendResetLink.onclick = function() {
     resetSpinner.style.display = 'block';
     sendResetLink.disabled = true;
 
-    formData.append('csrf_token', getCsrfToken());
-
     // Create a FormData object to send the email
     const formData = new FormData();
     formData.append('reset_email', email);
+    formData.append('csrf_token', getCsrfToken());
 
     // Use fetch to send the reset request
     fetch('forgot-password-handler.php', {
         method: 'POST',
+        headers: {
+            'Accept': 'application/json'
+        },
         body: formData
     })
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json();
+        return response.text();
     })
-    .then(data => {
+    .then(text => {
+        // log raw response for debugging
+        console.log('raw response text:', text);
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON parse failed, server returned:', text);
+            throw e;
+        }
         resetSpinner.style.display = 'none';
         sendResetLink.disabled = false;
         forgotPasswordModal.style.display = 'none';

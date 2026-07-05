@@ -30,23 +30,36 @@ $message = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_username = trim($_POST['username']);
     $new_email = trim($_POST['email']);
+    $new_password = trim($_POST['password']);
 
-    if (!empty($_POST['password'])) {
-        $new_password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-        $update_query = "UPDATE users SET username = ?, email = ?, password = ? WHERE username = ?";
-        $stmt = $conn->prepare($update_query);
-        $stmt->bind_param("ssss", $new_username, $new_email, $new_password, $user);
-    } else {
-        $update_query = "UPDATE users SET username = ?, email = ? WHERE username = ?";
-        $stmt = $conn->prepare($update_query);
-        $stmt->bind_param("sss", $new_username, $new_email, $user);
+    $update_password = false;
+    if (!empty($new_password)) {
+        // Validate password
+        if (strlen($new_password) < 8 || !preg_match('/[a-z]/', $new_password) || !preg_match('/[A-Z]/', $new_password) || !preg_match('/\d/', $new_password) || !preg_match('/[^\w]/', $new_password)) {
+            $message = "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
+        } else {
+            $update_password = true;
+            $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
+        }
     }
 
-    if ($stmt->execute()) {
-        $_SESSION['username'] = $new_username;
-        $message = "Profile updated successfully!";
-    } else {
-        $message = "Error updating profile: " . $stmt->error;
+    if (empty($message)) {
+        if ($update_password) {
+            $update_query = "UPDATE users SET username = ?, email = ?, password = ? WHERE username = ?";
+            $stmt = $conn->prepare($update_query);
+            $stmt->bind_param("ssss", $new_username, $new_email, $hashed_password, $user);
+        } else {
+            $update_query = "UPDATE users SET username = ?, email = ? WHERE username = ?";
+            $stmt = $conn->prepare($update_query);
+            $stmt->bind_param("sss", $new_username, $new_email, $user);
+        }
+
+        if ($stmt->execute()) {
+            $_SESSION['username'] = $new_username;
+            $message = "Profile updated successfully!";
+        } else {
+            $message = "Error updating profile: " . $stmt->error;
+        }
     }
 
     $stmt->close();
@@ -126,7 +139,9 @@ $conn->close();
 
         <div class="form-group">
             <label for="password"><i class="fas fa-lock" style="margin-right: 8px;"></i>New Password (leave blank to keep current)</label>
-            <input type="password" id="password" name="password">
+            <input type="password" id="password" name="password"
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
             <span class="focus-border"></span>
         </div>
         <?php echo csrf_field(); ?>

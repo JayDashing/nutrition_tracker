@@ -10,6 +10,11 @@ if (empty($_SESSION['csrf_token'])) {
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+$host   = 'localhost';   
+$user   = 'root';        
+$pass   = '';            
+$dbname = 'nutrack_db';  
+
 $rootDir = dirname(__DIR__, 2);
 require_once $rootDir . '/vendor/autoload.php';
 
@@ -18,26 +23,27 @@ if (file_exists($rootDir . '/.env')) {
     $dotenv->load();
 }
 
-$host   = $_ENV['DB_HOST'] ?? getenv('DB_HOST');
-$user   = $_ENV['DB_USER'] ?? getenv('DB_USER');
-$pass   = $_ENV['DB_PASS'] ?? getenv('DB_PASS');
-$dbname = 'nutrack_db'; 
-
 try {
     $conn = new mysqli($host, $user, $pass, $dbname);
     $conn->set_charset("utf8mb4");
 } catch (\mysqli_sql_exception $e) {
-    error_log("Database connection failed: " . $e->getMessage());
-    die("A critical error occurred while connecting to the database.");
+    die("Connection failed: " . $e->getMessage());
 }
 
 function verify_csrf() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
             error_log("CSRF validation failed for IP: $ip");
-            
+
+            // If the client expects JSON, return a JSON error instead of plain text
+            $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+            if (strpos($accept, 'application/json') !== false) {
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Invalid security token.']);
+                exit;
+            }
+
             die("Invalid security token. Please go back, refresh the page, and try again.");
         }
     }
