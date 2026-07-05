@@ -33,6 +33,12 @@ app.use(session({
   }
 }));
 
+// Request logger
+app.use((req, res, next) => {
+  console.log('REQUEST:', req.method, req.originalUrl);
+  next();
+});
+
 // Static files
 app.use(express.static(path.join(__dirname, 'codes')));
 app.use('/nutrition_tracker', express.static(__dirname));

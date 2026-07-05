@@ -9,6 +9,8 @@ import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
+console.log('routes/auth.js loaded');
+
 // Configure email transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -21,12 +23,26 @@ const transporter = nodemailer.createTransport({
 // Register endpoint
 router.post('/register', async (req, res) => {
   try {
-    const { email, username, password } = req.body;
-    const firstName = req.body.firstName || '';
-    const lastName = req.body.lastName || '';
+    console.log('POST /api/auth/register', req.body);
+    const {
+      email,
+      username,
+      password,
+      signup_email,
+      signup_username,
+      signup_password,
+      firstName,
+      lastName
+    } = req.body;
+
+    const regEmail = email || signup_email;
+    const regUsername = username || signup_username;
+    const regPassword = password || signup_password;
+    const first_name = firstName || req.body.first_name || '';
+    const last_name = lastName || req.body.last_name || '';
 
     // Validate input
-    if (!email || !username || !password) {
+    if (!regEmail || !regUsername || !regPassword) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -40,24 +56,24 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user exists
-    const existingUser = await query('SELECT * FROM users WHERE email = ? OR username = ?', [email, username]);
+    const existingUser = await query('SELECT * FROM users WHERE email = ? OR username = ?', [regEmail, regUsername]);
     if (existingUser.length > 0) {
       return res.status(409).json({ error: 'Email or username already exists' });
     }
 
     // Hash password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(regPassword);
 
     // Create user
     await query(
       'INSERT INTO users (email, username, password, first_name, last_name, role, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-      [email, username, hashedPassword, firstName, lastName, 'user']
+      [regEmail, regUsername, hashedPassword, first_name, last_name, 'user']
     );
 
     // Set session
-    const user = await query('SELECT id FROM users WHERE username = ?', [username]);
+    const user = await query('SELECT id FROM users WHERE username = ?', [regUsername]);
     req.session.userId = user[0].id;
-    req.session.username = username;
+    req.session.username = regUsername;
     req.session.role = 'user';
 
     res.json({ message: 'Registration successful', redirect: '/dashboard' });
@@ -70,10 +86,22 @@ router.post('/register', async (req, res) => {
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
-    const { email, signin_identifier, password } = req.body;
-    const identifier = email || signin_identifier;
+    console.log('POST /api/auth/login', req.body);
+    const {
+      email,
+      signin_identifier,
+      signin_password,
+      password,
+      username,
+      signin_username
+    } = req.body;
 
-    if (!identifier || !password) {
+    const identifier = email || signin_identifier || username || signin_username;
+    const loginPassword = password || signin_password;
+
+    console.log('identifier', identifier, 'passwordPresent', !!loginPassword);
+
+    if (!identifier || !loginPassword) {
       return res.status(400).json({ error: 'Email or username and password required' });
     }
 
@@ -81,12 +109,13 @@ router.post('/login', async (req, res) => {
       'SELECT * FROM users WHERE email = ? OR username = ?',
       [identifier, identifier]
     );
+    console.log('login users count', users.length, users.map(u => ({id:u.id,username:u.username,email:u.email,role:u.role}))); 
     if (users.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const user = users[0];
-    const passwordMatch = await comparePassword(password, user.password);
+    const passwordMatch = await comparePassword(loginPassword, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
