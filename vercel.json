@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/", "dest": "/php/index.html" },
+    { "src": "/(.*)", "dest": "/php/$1" }
+  ]
+}
