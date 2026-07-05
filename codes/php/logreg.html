@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NutriTrack | Login & Register</title>
-    <meta name="csrf-token" content="">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/logreg.css">
 </head>
@@ -135,19 +134,5 @@
 
     <script src="/nutrition_tracker/codes/js/utils.js"></script>
     <script src="/nutrition_tracker/codes/js/logreg.js"></script>
-    <script>
-        window.csrfToken = '';
-        fetch('/api/csrf', { credentials: 'include' })
-            .then(res => res.json())
-            .then(data => {
-                const token = data.csrf_token || '';
-                window.csrfToken = token;
-                const meta = document.querySelector('meta[name="csrf-token"]');
-                if (meta) {
-                    meta.setAttribute('content', token);
-                }
-            })
-            .catch(console.error);
-    </script>
 </body>
 </html>

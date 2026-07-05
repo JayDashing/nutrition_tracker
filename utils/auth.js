@@ -40,12 +40,6 @@ export function generateOTP() {
   return String(Math.floor(Math.random() * 100000)).padStart(5, '0');
 }
 
-// CSRF Token verification
-export function verifyCsrfToken(req) {
-  const token = req.body.csrf_token || req.headers['x-csrf-token'];
-  return token && token === req.session.csrf_token;
-}
-
 // Middleware to check authentication
 export function requireAuth(req, res, next) {
   if (!req.session.userId) {

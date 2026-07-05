@@ -12,8 +12,6 @@ const resetSuccessOk = document.getElementById('resetSuccessOk');
 const formMessage = document.getElementById('form-message');
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
-let csrfToken = window.csrfToken || '';
-let csrfLoading = false;
 
 function openModal() {
     if (modal) {
@@ -93,43 +91,12 @@ function togglePassword(inputId, icon) {
     }
 }
 
-async function ensureCsrfToken() {
-    if (csrfToken || csrfLoading) {
-        return csrfToken;
-    }
-    csrfLoading = true;
-    try {
-        const response = await fetch('/api/csrf', { credentials: 'include' });
-        if (!response.ok) {
-            throw new Error('Unable to load CSRF token');
-        }
-        const data = await response.json();
-        csrfToken = data.csrf_token || '';
-        window.csrfToken = csrfToken;
-        const metaTag = document.querySelector('meta[name="csrf-token"]');
-        if (metaTag) {
-            metaTag.setAttribute('content', csrfToken);
-        }
-        return csrfToken;
-    } catch (error) {
-        console.error('CSRF load failed:', error);
-        return '';
-    } finally {
-        csrfLoading = false;
-    }
-}
-
-function getCsrfToken() {
-    return csrfToken || (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
-}
-
 if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!formMessage) return;
         formMessage.textContent = '';
 
-        await ensureCsrfToken();
         const identifierInput = document.getElementById('signin_identifier');
         const passwordInput = document.getElementById('signin_password');
 
@@ -144,8 +111,7 @@ if (loginForm) {
 
         const payload = {
             signin_identifier: identifier,
-            password,
-            csrf_token: getCsrfToken()
+            password
         };
 
         const response = await fetch('/api/auth/login', {
@@ -172,8 +138,6 @@ if (signupForm) {
         if (!formMessage) return;
         formMessage.textContent = '';
 
-        await ensureCsrfToken();
-
         const usernameInput = document.getElementById('signup_username');
         const emailInput = document.getElementById('signup_email');
         const passwordInput = document.getElementById('signup_password');
@@ -199,8 +163,7 @@ if (signupForm) {
         const payload = {
             username,
             email,
-            password,
-            csrf_token: getCsrfToken()
+            password
         };
 
         const response = await fetch('/api/auth/register', {
@@ -224,7 +187,6 @@ if (signupForm) {
 if (sendResetLink) {
     sendResetLink.addEventListener('click', async (event) => {
         event.preventDefault();
-        await ensureCsrfToken();
 
         const emailInput = document.getElementById('resetEmail');
         const email = emailInput ? emailInput.value.trim() : '';
@@ -240,7 +202,7 @@ if (sendResetLink) {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, csrf_token: getCsrfToken() })
+            body: JSON.stringify({ email })
         });
 
         if (resetSpinner) resetSpinner.style.display = 'none';

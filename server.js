@@ -37,19 +37,7 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'codes')));
 app.use('/nutrition_tracker', express.static(__dirname));
 
-// CSRF token middleware
-app.use((req, res, next) => {
-  if (!req.session.csrf_token) {
-    req.session.csrf_token = crypto.randomBytes(32).toString('hex');
-  }
-  res.locals.csrf_token = req.session.csrf_token;
-  next();
-});
-
-// CSRF token endpoint for static pages
-app.get('/api/csrf', (req, res) => {
-  res.json({ csrf_token: req.session.csrf_token });
-});
+// no CSRF middleware for Node auth routes
 
 // API Routes
 app.use('/api/auth', authRoutes);

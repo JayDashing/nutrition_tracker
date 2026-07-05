@@ -3,10 +3,7 @@ import { query } from '../config/database.js';
 import { 
   hashPassword, 
   comparePassword, 
-  generateToken, 
-  checkPasswordStrength,
-  generateOTP,
-  verifyCsrfToken 
+  checkPasswordStrength
 } from '../utils/auth.js';
 import nodemailer from 'nodemailer';
 
@@ -24,10 +21,6 @@ const transporter = nodemailer.createTransport({
 // Register endpoint
 router.post('/register', async (req, res) => {
   try {
-    if (!verifyCsrfToken(req)) {
-      return res.status(403).json({ error: 'CSRF token invalid' });
-    }
-
     const { email, username, password } = req.body;
     const firstName = req.body.firstName || '';
     const lastName = req.body.lastName || '';
@@ -77,12 +70,8 @@ router.post('/register', async (req, res) => {
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
-    if (!verifyCsrfToken(req)) {
-      return res.status(403).json({ error: 'CSRF token invalid' });
-    }
-
     const { email, signin_identifier, password } = req.body;
-  const identifier = email || signin_identifier;
+    const identifier = email || signin_identifier;
 
     if (!identifier || !password) {
       return res.status(400).json({ error: 'Email or username and password required' });
@@ -124,10 +113,6 @@ router.post('/login', async (req, res) => {
 // Forgot password endpoint (basic placeholder)
 router.post('/forgot-password', async (req, res) => {
   try {
-    if (!verifyCsrfToken(req)) {
-      return res.status(403).json({ error: 'CSRF token invalid' });
-    }
-
     const { email } = req.body;
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
