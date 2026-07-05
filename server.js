@@ -35,6 +35,7 @@ app.use(session({
 
 // Static files
 app.use(express.static(path.join(__dirname, 'codes')));
+app.use('/nutrition_tracker', express.static(__dirname));
 
 // CSRF token middleware
 app.use((req, res, next) => {
@@ -45,8 +46,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// CSRF token endpoint for static pages
+app.get('/api/csrf', (req, res) => {
+  res.json({ csrf_token: req.session.csrf_token });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
+
+// Legacy PHP-style login/register route support
+app.get(['/logreg.php', '/nutrition_tracker/logreg.php'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'codes', 'php', 'logreg.html'));
+});
 // Additional routes will be added here:
 // import dashboardRoutes from './routes/dashboard.js';
 // import mealRoutes from './routes/meals.js';

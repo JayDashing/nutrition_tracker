@@ -28,7 +28,9 @@ router.post('/register', async (req, res) => {
       return res.status(403).json({ error: 'CSRF token invalid' });
     }
 
-    const { email, username, password, firstName, lastName } = req.body;
+    const { email, username, password } = req.body;
+    const firstName = req.body.firstName || '';
+    const lastName = req.body.lastName || '';
 
     // Validate input
     if (!email || !username || !password) {
@@ -79,13 +81,17 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'CSRF token invalid' });
     }
 
-    const { email, password } = req.body;
+    const { email, signin_identifier, password } = req.body;
+  const identifier = email || signin_identifier;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+    if (!identifier || !password) {
+      return res.status(400).json({ error: 'Email or username and password required' });
     }
 
-    const users = await query('SELECT * FROM users WHERE email = ?', [email]);
+    const users = await query(
+      'SELECT * FROM users WHERE email = ? OR username = ?',
+      [identifier, identifier]
+    );
     if (users.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -112,6 +118,31 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Forgot password endpoint (basic placeholder)
+router.post('/forgot-password', async (req, res) => {
+  try {
+    if (!verifyCsrfToken(req)) {
+      return res.status(403).json({ error: 'CSRF token invalid' });
+    }
+
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const users = await query('SELECT id FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.json({ message: 'If an account exists, a reset link has been sent.' });
+    }
+
+    // TODO: implement password reset email logic here
+    return res.json({ message: 'If an account exists, a reset link has been sent.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Unable to process request' });
   }
 });
 

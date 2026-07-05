@@ -1,204 +1,230 @@
-// Modal functionality
-const modal = document.getElementById("signup-modal");
-const otpModal = document.getElementById("otp-modal");
-const desktopSignupLink = document.getElementById("desktop-signup-link");
-const mobileSignupLink = document.getElementById("mobile-signup-link");
-const signinLink = document.getElementById("signin-link");
-const closeBtn = document.getElementsByClassName("close")[0];
+﻿const modal = document.getElementById('signup-modal');
+const desktopSignupLink = document.getElementById('desktop-signup-link');
+const mobileSignupLink = document.getElementById('mobile-signup-link');
+const signinLink = document.getElementById('signin-link');
+const closeButtons = document.getElementsByClassName('close');
+const forgotPasswordLink = document.getElementById('forgot-password-link');
+const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+const resetSuccessModal = document.getElementById('resetSuccessModal');
+const resetSpinner = document.getElementById('resetSpinner');
+const sendResetLink = document.getElementById('sendResetLink');
+const resetSuccessOk = document.getElementById('resetSuccessOk');
+const formMessage = document.getElementById('form-message');
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
 
 function openModal() {
-    modal.style.display = "block";
-    document.body.style.overflow = "hidden";
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeModal() {
-    modal.style.display = "none";
-    document.body.style.overflow = "auto";
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
-if (desktopSignupLink) desktopSignupLink.addEventListener("click", openModal);
-if (mobileSignupLink) mobileSignupLink.addEventListener("click", openModal);
-if (signinLink) signinLink.addEventListener("click", closeModal);
-if (closeBtn) closeBtn.addEventListener("click", closeModal);
+if (desktopSignupLink) {
+    desktopSignupLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        openModal();
+    });
+}
 
-window.addEventListener("click", function(event) {
-    if (event.target == modal) {
+if (mobileSignupLink) {
+    mobileSignupLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        openModal();
+    });
+}
+
+if (signinLink) {
+    signinLink.addEventListener('click', (event) => {
+        event.preventDefault();
         closeModal();
+    });
+}
+
+if (forgotPasswordLink) {
+    forgotPasswordLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (forgotPasswordModal) {
+            forgotPasswordModal.style.display = 'block';
+        }
+    });
+}
+
+Array.from(closeButtons).forEach((button) => {
+    button.addEventListener('click', () => {
+        if (forgotPasswordModal) forgotPasswordModal.style.display = 'none';
+        if (resetSuccessModal) resetSuccessModal.style.display = 'none';
+        closeModal();
+    });
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        closeModal();
+    }
+    if (event.target === forgotPasswordModal) {
+        forgotPasswordModal.style.display = 'none';
+    }
+    if (event.target === resetSuccessModal) {
+        resetSuccessModal.style.display = 'none';
     }
 });
 
-// Toggle password visibility
 function togglePassword(inputId, icon) {
     const passwordInput = document.getElementById(inputId);
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
+    if (!passwordInput) return;
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
         icon.classList.remove('bx-show');
         icon.classList.add('bx-hide');
     } else {
-        passwordInput.type = "password";
+        passwordInput.type = 'password';
         icon.classList.remove('bx-hide');
         icon.classList.add('bx-show');
     }
 }
 
-// Get modal elements
-const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-const resetSuccessModal = document.getElementById('resetSuccessModal');
-const resetSpinner = document.getElementById('resetSpinner');
-
-// Get the button that opens the modal
-const forgotPasswordLink = document.querySelector('.form-check a'); // Add href="javascript:void(0)" to your forgot password link
-
-// Get close buttons
-const closeButtons = document.getElementsByClassName('close');
-
-// Get action buttons
-const sendResetLink = document.getElementById('sendResetLink');
-const resetSuccessOk = document.getElementById('resetSuccessOk');
-
-// Open forgot password modal
-forgotPasswordLink.onclick = function() {
-    forgotPasswordModal.style.display = 'block';
+function getCsrfToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    return metaTag ? metaTag.getAttribute('content') : '';
 }
 
-// Close modals when clicking (x)
-Array.from(closeButtons).forEach(button => {
-    button.onclick = function() {
-        forgotPasswordModal.style.display = 'none';
-        resetSuccessModal.style.display = 'none';
-    }
-});
+if (loginForm) {
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!formMessage) return;
+        formMessage.textContent = '';
 
-// Close modals when clicking outside
-window.onclick = function(event) {
-    if (event.target == forgotPasswordModal || event.target == resetSuccessModal) {
-        forgotPasswordModal.style.display = 'none';
-        resetSuccessModal.style.display = 'none';
-    }
-}
+        const identifierInput = document.getElementById('signin_identifier');
+        const passwordInput = document.getElementById('signin_password');
 
-// Handle success OK button
-resetSuccessOk.onclick = function() {
-    resetSuccessModal.style.display = 'none';
-}
+        const identifier = identifierInput ? identifierInput.value.trim() : '';
+        const password = passwordInput ? passwordInput.value : '';
 
-// OTP Input Handling
-document.querySelectorAll('.otp-input').forEach((input, index) => {
-    input.addEventListener('keyup', function(e) {
-        if (e.key >= 0 && e.key <= 9) {
-            if (index < 4) {
-                document.querySelectorAll('.otp-input')[index + 1].focus();
-            }
-        } else if (e.key === 'Backspace') {
-            if (index > 0) {
-                document.querySelectorAll('.otp-input')[index - 1].focus();
-            }
+        if (!identifier || !password) {
+            formMessage.textContent = 'Please enter username/email and password.';
+            formMessage.className = 'form-message error-message';
+            return;
         }
-    });
-});
 
-// Timer Function
-if (document.getElementById('timer')) {
-    let timeLeft = 300; // 5 minutes in seconds
-    const timerDisplay = document.getElementById('timer');
-    const resendBtn = document.getElementById('resend-btn');
-    
-    const timer = setInterval(() => {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        
-        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            timerDisplay.textContent = "0:00";
-            resendBtn.disabled = false;
-            resendBtn.classList.add('active');
-        }
-        
-        timeLeft--;
-    }, 1000);
-}
+        const payload = {
+            signin_identifier: identifier,
+            password,
+            csrf_token: getCsrfToken()
+        };
 
-document.getElementById('otp-form').addEventListener('submit', function(e) {
-    console.log('Form submitted'); // Add this to check if form submission is working
-});
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-document.querySelector('button[name="verify_otp"]').addEventListener('click', function(e) {
-    const otpInputs = document.querySelectorAll('.otp-input');
-    const allFilled = Array.from(otpInputs).every(input => input.value.trim() !== '');
-    
-    if (!allFilled) {
-        e.preventDefault();
-        alert('Please fill in all OTP digits');
-    }
-});
-
-// Modify the existing script with these changes
-
-sendResetLink.onclick = function() {
-    const email = document.getElementById('resetEmail').value;
-    
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-        alert('Please enter your email address');
-        return;
-    }
-
-    if (!emailRegex.test(email)) {
-        alert('Please enter a valid email address');
-        return;
-    }
-
-    // Show loading spinner
-    resetSpinner.style.display = 'block';
-    sendResetLink.disabled = true;
-
-    // Create a FormData object to send the email
-    const formData = new FormData();
-    formData.append('reset_email', email);
-    formData.append('csrf_token', getCsrfToken());
-
-    // Use fetch to send the reset request
-    fetch('forgot-password-handler.php', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json'
-        },
-        body: formData
-    })
-    .then(response => {
+        const data = await response.json();
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            formMessage.textContent = data.error || 'Login failed.';
+            formMessage.className = 'form-message error-message';
+            return;
         }
-        return response.text();
-    })
-    .then(text => {
-        // log raw response for debugging
-        console.log('raw response text:', text);
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error('JSON parse failed, server returned:', text);
-            throw e;
+
+        window.location.href = data.redirect || '/dashboard';
+    });
+}
+
+if (signupForm) {
+    signupForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!formMessage) return;
+        formMessage.textContent = '';
+
+        const usernameInput = document.getElementById('signup_username');
+        const emailInput = document.getElementById('signup_email');
+        const passwordInput = document.getElementById('signup_password');
+        const confirmInput = document.getElementById('signup_confirm_password');
+
+        const username = usernameInput ? usernameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+        const password = passwordInput ? passwordInput.value : '';
+        const confirmPassword = confirmInput ? confirmInput.value : '';
+
+        if (!username || !email || !password || !confirmPassword) {
+            formMessage.textContent = 'Please fill in all registration fields.';
+            formMessage.className = 'form-message error-message';
+            return;
         }
-        resetSpinner.style.display = 'none';
+
+        if (password !== confirmPassword) {
+            formMessage.textContent = 'Passwords do not match.';
+            formMessage.className = 'form-message error-message';
+            return;
+        }
+
+        const payload = {
+            username,
+            email,
+            password,
+            csrf_token: getCsrfToken()
+        };
+
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            formMessage.textContent = data.error || 'Registration failed.';
+            formMessage.className = 'form-message error-message';
+            return;
+        }
+
+        window.location.href = data.redirect || '/dashboard';
+    });
+}
+
+if (sendResetLink) {
+    sendResetLink.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        const emailInput = document.getElementById('resetEmail');
+        const email = emailInput ? emailInput.value.trim() : '';
+        if (!email) {
+            alert('Please enter your email address.');
+            return;
+        }
+
+        if (resetSpinner) resetSpinner.style.display = 'block';
+        sendResetLink.disabled = true;
+
+        const response = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, csrf_token: getCsrfToken() })
+        });
+
+        if (resetSpinner) resetSpinner.style.display = 'none';
         sendResetLink.disabled = false;
-        forgotPasswordModal.style.display = 'none';
-        
-        // Check the response from the server
-        if (data.status === 'success') {
-            resetSuccessModal.style.display = 'block';
-        } else {
-            alert(data.message || 'An error occurred. Please try again.');
+
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.error || 'Unable to send reset link.');
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        resetSpinner.style.display = 'none';
-        sendResetLink.disabled = false;
-        alert('An error occurred. Please try again.');
+
+        if (forgotPasswordModal) forgotPasswordModal.style.display = 'none';
+        if (resetSuccessModal) resetSuccessModal.style.display = 'block';
+    });
+}
+
+if (resetSuccessOk) {
+    resetSuccessOk.addEventListener('click', () => {
+        if (resetSuccessModal) resetSuccessModal.style.display = 'none';
     });
 }
