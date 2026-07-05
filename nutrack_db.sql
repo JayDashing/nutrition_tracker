@@ -251,7 +251,9 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `username`, `email`, `created_at`, `password`, `role`, `profile_picture`, `status`, `last_login`, `reset_token`, `reset_token_expiry`, `reset_expires`) VALUES
 (12, 'nutriadmin', 'nutriadmin@gmail.com', '2025-02-20 13:00:17', '$2y$10$Zgjq99O/1dsVUWMlEBcrPumwFwomCAKU55R3nwhr0BWBMbePB1wsq', 'admin', 'uploads/profile_pictures/nutriadmin_1740674284.jpg', 'active', '2025-03-09 11:13:46', '', '0000-00-00 00:00:00', 0),
 (42, 'John Alfred', 'eborda.johnalfred@gmail.com', '2025-03-05 22:57:13', '$2y$10$pYzo2QRxdzmMhqZXD6UPG.3Sk0.hofpfqL5YD/WFdBEdWU8oV2Iam', 'user', NULL, 'active', '2025-03-08 19:34:09', '', '2025-03-07 07:11:55', 0),
-(49, 'Jay Dash', 'j.eborda.536024@umindanao.edu.ph', '2025-03-06 17:48:47', '$2y$10$aCx4DR5Dgk6nqgIACdhQ6OhRtw/aSd2FVTbmV5SqWx5NXYz1LEGmK', 'user', 'uploads/profile_pictures/Jay Dash_1741405534.jpg', 'active', '2025-03-08 20:45:21', '', '2025-03-07 16:21:28', 0);
+(49, 'Jay Dash', 'j.eborda.536024@umindanao.edu.ph', '2025-03-06 17:48:47', '$2y$10$aCx4DR5Dgk6nqgIACdhQ6OhRtw/aSd2FVTbmV5SqWx5NXYz1LEGmK', 'user', 'uploads/profile_pictures/Jay Dash_1741405534.jpg', 'active', '2025-03-08 20:45:21', '', '2025-03-07 16:21:28', 0),
+(1000, 'sampleuser', 'sampleuser@example.com', '2026-07-05 00:00:00', '$2a$10$q2UtQaa711TQH.xSxIJDJ.cDrU/duvhekx8fs5491rCFDsPfr8XZG', 'user', NULL, 'active', NULL, '', '1970-01-01 00:00:00', 0),
+(1001, 'sampleadmin', 'sampleadmin@example.com', '2026-07-05 00:00:00', '$2a$10$PfsTOuvhnuf/j.Zu2.8K5OZo2dfintIEzFpGeFu73lBcUkp1NiFnS', 'admin', NULL, 'active', NULL, '', '1970-01-01 00:00:00', 0);
 
 -- --------------------------------------------------------
 

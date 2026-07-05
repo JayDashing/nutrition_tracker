@@ -12,6 +12,8 @@ const resetSuccessOk = document.getElementById('resetSuccessOk');
 const formMessage = document.getElementById('form-message');
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
+let csrfToken = window.csrfToken || '';
+let csrfLoading = false;
 
 function openModal() {
     if (modal) {
@@ -91,12 +93,34 @@ function togglePassword(inputId, icon) {
     }
 }
 
-function getCsrfToken() {
-    if (window.csrfToken) {
-        return window.csrfToken;
+async function ensureCsrfToken() {
+    if (csrfToken || csrfLoading) {
+        return csrfToken;
     }
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    return metaTag ? metaTag.getAttribute('content') : '';
+    csrfLoading = true;
+    try {
+        const response = await fetch('/api/csrf', { credentials: 'include' });
+        if (!response.ok) {
+            throw new Error('Unable to load CSRF token');
+        }
+        const data = await response.json();
+        csrfToken = data.csrf_token || '';
+        window.csrfToken = csrfToken;
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            metaTag.setAttribute('content', csrfToken);
+        }
+        return csrfToken;
+    } catch (error) {
+        console.error('CSRF load failed:', error);
+        return '';
+    } finally {
+        csrfLoading = false;
+    }
+}
+
+function getCsrfToken() {
+    return csrfToken || (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
 }
 
 if (loginForm) {
@@ -105,6 +129,7 @@ if (loginForm) {
         if (!formMessage) return;
         formMessage.textContent = '';
 
+        await ensureCsrfToken();
         const identifierInput = document.getElementById('signin_identifier');
         const passwordInput = document.getElementById('signin_password');
 
@@ -146,6 +171,8 @@ if (signupForm) {
         event.preventDefault();
         if (!formMessage) return;
         formMessage.textContent = '';
+
+        await ensureCsrfToken();
 
         const usernameInput = document.getElementById('signup_username');
         const emailInput = document.getElementById('signup_email');
@@ -197,6 +224,7 @@ if (signupForm) {
 if (sendResetLink) {
     sendResetLink.addEventListener('click', async (event) => {
         event.preventDefault();
+        await ensureCsrfToken();
 
         const emailInput = document.getElementById('resetEmail');
         const email = emailInput ? emailInput.value.trim() : '';
