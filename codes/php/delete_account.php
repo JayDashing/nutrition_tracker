@@ -1,12 +1,13 @@
 <?php
-require 'db.php';
-session_start();
+require 'init.php';
 
 // Ensure user is logged in
 if (!isset($_SESSION['username'])) {
     header("Location: logreg.php");
     exit();
 }
+
+verify_csrf();
 
 $username = $_SESSION['username'];
 
@@ -56,6 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_account'])) {
         <p>Once deleted, you cannot recover your account. Are you sure?</p>
 
         <form method="POST" action="">
+            <?php echo csrf_field(); ?>
             <div class="modal-buttons">
                 <button type="submit" name="delete_account" class="btn btn-danger">Yes, Delete My Account</button>
                 <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>

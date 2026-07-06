@@ -1,9 +1,11 @@
 <?php
-require 'db.php';
-session_start();
+require 'init.php';
+
+verify_csrf();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use ZxcvbnPhp\Zxcvbn;
 
 require __DIR__ . '/PHPMailer/Exception.php';
 require __DIR__ . '/PHPMailer/PHPMailer.php';
@@ -22,8 +24,8 @@ function sendOTP($email, $otp) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'lourymarcu@gmail.com';
-        $mail->Password = 'zuifxkkefhflyqdi';
+        $mail->Username = $_ENV['SMTP_EMAIL'];
+        $mail->Password = $_ENV['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
@@ -34,7 +36,7 @@ function sendOTP($email, $otp) {
             )
         );
 
-        $mail->setFrom('nutritrack2025@gmail.com', 'NutriTrack');
+        $mail->setFrom('hanazonodatabase@gmail.com', '09097284445xd');
         $mail->addAddress($email);
         
         $mail->isHTML(true);
@@ -87,6 +89,15 @@ function sendOTP($email, $otp) {
 
 // Handle OTP Verification
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
+    // Rate limiting for OTP verification (5 attempts per 15 minutes)
+    $rate_check = check_rate_limit('otp_verify', 5, 300);
+    if (!$rate_check['allowed']) {
+        $minutes = ceil($rate_check['retry_after'] / 60);
+        $_SESSION['error'] = "Too many failed verification attempts. Please try again in $minutes minutes.";
+        header('Location: logreg.php?show_otp=true');
+        exit;
+    }
+    
     $entered_otp = implode('', $_POST['otp']);
     $stored_otp = $_SESSION['registration_otp'];
     $stored_otp_time = $_SESSION['registration_otp_time'];
@@ -99,6 +110,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
     }
     
     if ($entered_otp === $stored_otp) {
+        // Clear rate limit on successful verification
+        clear_rate_limit('otp_verify');
+        
         // Complete registration process
         $username = $_SESSION['temp_username'];
         $email = $_SESSION['temp_email'];
@@ -127,6 +141,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
             exit;
         }
     } else {
+        // Record failed attempt
+        record_rate_limit('otp_verify');
         $_SESSION['error'] = 'Invalid OTP. Please try again.';
         header('Location: logreg.php?show_otp=true');
         exit;
@@ -135,6 +151,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_otp'])) {
 
 // Resend OTP
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['resend_otp'])) {
+    // Rate limiting for OTP resend (3 attempts per 15 minutes)
+    $rate_check = check_rate_limit('otp_resend', 3, 300);
+    if (!$rate_check['allowed']) {
+        $minutes = ceil($rate_check['retry_after'] / 60);
+        $_SESSION['error'] = "Too many resend attempts. Please try again in $minutes minutes.";
+        header('Location: logreg.php?show_otp=true');
+        exit;
+    }
+    
+    record_rate_limit('otp_resend');
+    
     $new_otp = generateOTP();
     $_SESSION['registration_otp'] = $new_otp;
     $_SESSION['registration_otp_time'] = time();
@@ -163,6 +190,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     
     if ($password !== $confirm_password) {
         $_SESSION['error'] = "Passwords do not match.";
+        header('Location: logreg.php');
+        exit;
+    }
+
+    //Password Policies
+    $uppercase = preg_match('@[A-Z]@', $password);
+    $lowercase = preg_match('@[a-z]@', $password);
+    $number    = preg_match('@[0-9]@', $password);
+    $specialChars = preg_match('@[^\w]@', $password); // Matches anything that isn't a letter or number
+
+    if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
+        $_SESSION['error'] = "Password must be at least 8 characters and include at least one uppercase letter, lowercase letter, number, and special character.";
+        header('Location: logreg.php');
+        exit;
+    }
+
+    $userData = [
+        $username,
+        $email,
+        'NutriTrack' 
+    ];
+
+    $zxcvbn = new Zxcvbn();
+    $strength = $zxcvbn->passwordStrength($password, $userData);
+
+    if ($strength['score'] < 3) {
+        $warning = !empty($strength['feedback']['warning'])
+            ? $strength['feedback']['warning']
+            : "The password is easy to guess.";
+        
+        if (!empty($strength['feedback']['suggestions'][0])) {
+            $warning .= " " . $strength['feedback']['suggestions'][0];
+        }
+        
+        $_SESSION['error'] = "(Score: " . $strength['score'] . "/4) " . $warning;
+
         header('Location: logreg.php');
         exit;
     }
@@ -203,6 +266,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
 
 // Sign-In
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
+    // Rate limiting for login (5 attempts per 15 minutes)
+    $rate_check = check_rate_limit('login', 5, 300);
+    if (!$rate_check['allowed']) {
+        $minutes = ceil($rate_check['retry_after'] / 60);
+        $_SESSION['error'] = "Too many failed login attempts. Please try again in $minutes minutes.";
+        header('Location: logreg.php');
+        exit;
+    }
+    
     $identifier = $conn->real_escape_string($_POST['signin_identifier']);
     $password = $_POST['signin_password'];
 
@@ -216,6 +288,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         $user = $result->fetch_assoc();
 
         if (password_verify($password, $user['password'])) {
+            // Clear rate limit on successful login
+            clear_rate_limit('login');
+            
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
             
@@ -224,6 +299,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         }
     }
     
+    // Record failed login attempt
+    record_rate_limit('login');
     $_SESSION['error'] = "Invalid username/email or password.";
     header('Location: logreg.php');
     exit;
@@ -235,6 +312,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>NutriTrack | Login & Register</title>
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/logreg.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -274,7 +352,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                     <label for="remember">Remember me</label>
                     <a href="#"><strong>Forgot Password?</strong></a>
                 </div>
-                
+                <?php echo csrf_field(); ?>
                 <button class="btn" type="submit" name="signin">Sign In</button>
             </form>
             
@@ -349,13 +427,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                 
                 <div class="form-group">
                      <i class='bx bxs-lock-alt'></i>
-                     <input type="password" name="signup_password" id="signup_password" placeholder="Password (min. 8 characters)" required minlength="8">
+                     <input type="password" name="signup_password" id="signup_password" 
+                        placeholder="Password" 
+                        required 
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                        title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
                      <i class='bx bx-show password-toggle' onclick="togglePassword('signup_password', this)"></i>
                 </div>
                 
                 <div class="form-group">
                     <i class='bx bxs-lock-alt'></i>
-                    <input type="password" name="signup_confirm_password" id="signup_confirm_password" placeholder="Confirm Password" required>
+                    <input type="password" name="signup_confirm_password" id="signup_confirm_password" 
+                        placeholder="Confirm Password" 
+                        required
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                        title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
                     <i class='bx bx-show password-toggle' onclick="togglePassword('signup_confirm_password', this)"></i>
                 </div>
                 
@@ -363,7 +449,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                     <input type="checkbox" name="terms" id="termsCheckbox" required>
                     <label for="termsCheckbox">I agree with the <a href="terms.php" target="_blank">Terms & Conditions</a></label>
                 </div>
-                
+                <?php echo csrf_field(); ?>
                 <button class="btn" type="submit" name="signup">Create Account</button>
             </form>
             
@@ -389,12 +475,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
                     <input type="text" class="otp-input" name="otp[]" maxlength="1" pattern="[0-9]" required>
                 </div>
                 <div class="otp-timer">Code expires in: <span id="timer"><strong>5:00</strong></span></div>
-            
+            <?php echo csrf_field(); ?>
             <button type="submit" name="resend_otp" class="resend-btn" id="resend-btn">Resend Code</button>
             <div><button type="submit" name="verify_otp" class="verify-btn">Verify</button></div>
         </form>
     </div>
  </div>
+ <script src="/nutrition_tracker/codes/js/utils.js"></script>
  <script src="/nutrition_tracker/codes/js/logreg.js"></script>
 </body>
 </html>

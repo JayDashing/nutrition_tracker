@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,10 +7,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+verify_csrf();
 
-//Database connection
-require_once 'db.php';
+$username = $_SESSION['username'];
 
 // Get user's total meals to personalize the page
 $meal_query = "SELECT COUNT(*) as meal_count FROM meals WHERE username = ?";
@@ -23,71 +22,6 @@ $meal_count = $meal_data['meal_count'] ?? 0;
 $stmt->close();
 
 $conn->close();
-
-/**
- * Get nutrition information from Nutritionix API
- *
- * @param string $query The food/meal query (e.g. "2 eggs with toast")
- * @return array|false Returns nutrition data or false on failure
- */
-function getNutritionInfo($query) {
-    // Nutritionix API credentials
-    $app_id = "14be65b6";
-    $app_key = "013362f3a3c7bcada7df574cb2fadf81";
-   
-    // API endpoint for natural language processing
-    $endpoint = "https://trackapi.nutritionix.com/v2/natural/nutrients";
-   
-    // Prepare the request
-    $data = json_encode([
-        'query' => $query,
-        'timezone' => 'Pacific', // Adjust as needed
-    ]);
-   
-    // Initialize cURL session
-    $ch = curl_init($endpoint);
-   
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'x-app-id: ' . $app_id,
-        'x-app-key: ' . $app_key,
-        'x-remote-user-id: 0' // 0 for development
-    ]);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-   
-    // Execute cURL request
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-   
-    // Close cURL session
-    curl_close($ch);
-   
-    // Check if request was successful
-    if ($http_code === 200) {
-        return json_decode($response, true);
-    } else {
-        error_log("Nutritionix API error: " . $response);
-        return false;
-    }
-}
-
-// Process form submission for nutrition lookup
-$nutritionData = null;
-$foodQuery = '';
-$apiError = false;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['food_query'])) {
-    $foodQuery = trim($_POST['food_query']);
-    if (!empty($foodQuery)) {
-        $nutritionData = getNutritionInfo($foodQuery);
-        if ($nutritionData === false) {
-            $apiError = true;
-        }
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -117,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['food_query'])) {
         <button class="tab-btn active" onclick="openTab(event, 'fat-loss')">Fat Loss</button>
         <button class="tab-btn" onclick="openTab(event, 'muscle-gain')">Muscle Gain</button>
         <button class="tab-btn" onclick="openTab(event, 'general-health')">General Health</button>
-        <button class="tab-btn" onclick="openTab(event, 'nutrition-search')">Nutrition Search</button>
     </div>
     
     <!-- Fat Loss Tab -->
@@ -410,146 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['food_query'])) {
             </div>
         </div>
     </div>
-    
-    <!-- Nutrition Search Tab (New) -->
-    <div id="nutrition-search" class="tab-content">
-        <div class="nutrition-card">
-            <h2><i class='bx bx-search-alt'></i> Nutrition Search</h2>
-            
-            <div class="fact-section">
-                <h3>Look Up Food Nutrition</h3>
-                <p>Enter any food, meal, or recipe to get detailed nutrition information powered by Nutritionix API.</p>
-                
-                <div class="search-container">
-                    <form method="POST" action="">
-                        <div class="search-input-container">
-                            <input type="text" name="food_query" id="food_query" class="search-input" placeholder="Example: '1 large apple' or '2 eggs with toast'" value="<?php echo htmlspecialchars($foodQuery); ?>">
-                            <button type="submit" class="search-btn"><i class='bx bx-search'></i> Analyze</button>
-                        </div>
-                    </form>
-                </div>
-                
-                <?php if ($apiError): ?>
-                <div class="error-message">
-                    <p><i class='bx bx-error-circle'></i> Sorry, we couldn't retrieve nutrition information for that query. Please try again with a different food or meal description.</p>
-                </div>
-                <?php endif; ?>
-                
-                <?php if ($nutritionData && isset($nutritionData['foods']) && !empty($nutritionData['foods'])): ?>
-                <div class="nutrition-results">
-                    <h3>Results for: <?php echo htmlspecialchars($foodQuery); ?></h3>
-                    
-                    <?php foreach ($nutritionData['foods'] as $food): ?>
-                    <div class="nutrition-result-item">
-                        <div class="food-header">
-                            <h4><?php echo htmlspecialchars($food['food_name']); ?></h4>
-                            <p class="food-quantity"><?php echo htmlspecialchars($food['serving_qty'] . ' ' . $food['serving_unit']); ?> (<?php echo round($food['serving_weight_grams']); ?>g)</p>
-                        </div>
-                        
-                        <div class="nutrition-summary">
-                            <div class="nutrition-summary-item">
-                                <span class="nutrition-value"><?php echo round($food['nf_calories']); ?></span>
-                                <span class="nutrition-label">Calories</span>
-                            </div>
-                            <div class="nutrition-summary-item">
-                                <span class="nutrition-value"><?php echo round($food['nf_protein']); ?>g</span>
-                                <span class="nutrition-label">Protein</span>
-                            </div>
-                            <div class="nutrition-summary-item">
-                                <span class="nutrition-value"><?php echo round($food['nf_total_carbohydrate']); ?>g</span>
-                                <span class="nutrition-label">Carbs</span>
-                            </div>
-                            <div class="nutrition-summary-item">
-                                <span class="nutrition-value"><?php echo round($food['nf_total_fat']); ?>g</span>
-                                <span class="nutrition-label">Fat</span>
-                            </div>
-                        </div>
-                        
-                        <div class="nutrition-details">
-                            <div class="nutrition-details-grid">
-                                <div class="nutrition-detail-item">
-                                    <span class="detail-label">Fiber:</span>
-                                    <span class="detail-value"><?php echo round($food['nf_dietary_fiber'], 1); ?>g</span>
-                                </div>
-                                <div class="nutrition-detail-item">
-                                    <span class="detail-label">Sugars:</span>
-                                    <span class="detail-value"><?php echo round($food['nf_sugars'], 1); ?>g</span>
-                                </div>
-                                <div class="nutrition-detail-item">
-                                    <span class="detail-label">Saturated Fat:</span>
-                                    <span class="detail-value"><?php echo round($food['nf_saturated_fat'], 1); ?>g</span>
-                                </div>
-                                <div class="nutrition-detail-item">
-                                    <span class="detail-label">Sodium:</span>
-                                    <span class="detail-value"><?php echo round($food['nf_sodium']); ?>mg</span>
-                                </div>
-                                <div class="nutrition-detail-item">
-                                    <span class="detail-label">Cholesterol:</span>
-                                    <span class="detail-value"><?php echo round($food['nf_cholesterol']); ?>mg</span>
-                                </div>
-                                <div class="nutrition-detail-item">
-                                    <span class="detail-label">Potassium:</span>
-                                    <span class="detail-value"><?php echo round($food['nf_potassium']); ?>mg</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <?php if (isset($food['full_nutrients']) && !empty($food['full_nutrients'])): ?>
-                        <div class="additional-nutrients">
-                            <button class="collapsible">Show More Nutrients <i class='bx bx-chevron-down'></i></button>
-                            <div class="collapsible-content">
-                                <div class="nutrients-grid">
-                                    <?php 
-                                    $nutrientMap = [
-                                        301 => 'Calcium',
-                                        303 => 'Iron',
-                                        306 => 'Potassium',
-                                        307 => 'Sodium',
-                                        309 => 'Zinc',
-                                        401 => 'Vitamin C',
-                                        415 => 'Vitamin B-6',
-                                        418 => 'Vitamin B-12',
-                                        324 => 'Vitamin D',
-                                        323 => 'Vitamin E',
-                                        328 => 'Vitamin A'
-                                    ];
-                                    
-                                    foreach ($food['full_nutrients'] as $nutrient):
-                                        if (isset($nutrientMap[$nutrient['attr_id']]) && $nutrient['value'] > 0):
-                                    ?>
-                                    <div class="nutrient-item">
-                                        <span class="nutrient-name"><?php echo $nutrientMap[$nutrient['attr_id']]; ?>:</span>
-                                        <span class="nutrient-value"><?php echo round($nutrient['value'], 2); ?></span>
-                                    </div>
-                                    <?php 
-                                        endif;
-                                    endforeach; 
-                                    ?>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php elseif ($foodQuery && !$apiError): ?>
-                <div class="nutrition-tip">
-                    <p>Enter a food or meal to see its nutrition information. Try to be specific with quantities, like "2 eggs" or "1 cup rice".</p>
-                </div>
-                <?php endif; ?>
-                
-                <div class="nutrition-tip">
-                    <h4><i class='bx bx-bulb'></i> Pro Tips</h4>
-                    <ul class="tips-list">
-                        <li><i class='bx bx-check-circle'></i> Be specific with quantities (e.g., "3 oz chicken breast" is better than just "chicken")</li>
-                        <li><i class='bx bx-check-circle'></i> You can search for whole meals (e.g., "2 eggs with 2 slices wheat toast and 1 tbsp butter")</li>
-                        <li><i class='bx bx-check-circle'></i> Common abbreviations like tbsp (tablespoon), tsp (teaspoon), and oz (ounce) work well</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+
     <a href="home.php" class="btn">Back to Home</a>
 </div>
 <script src="/nutrition_tracker/codes/js/nutrifacts.js"></script>

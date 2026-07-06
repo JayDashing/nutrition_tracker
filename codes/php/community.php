@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -9,11 +9,10 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-//Database connection
-require_once 'db.php';
-
-// Process meal share form submission
 $share_message = "";
+
+verify_csrf();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     // Get user ID
     $user_id_query = "SELECT id FROM users WHERE username = ?";
@@ -28,30 +27,69 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_meal'])) {
     // Process file upload
     $meal_name = htmlspecialchars($_POST['meal_name']);
     $meal_description = htmlspecialchars($_POST['meal_description']);
-    $calories = (int)$_POST['calories'];
+    $raw_calories = $_POST['calories'];
+    $uploadOk = 1;
+    
+
     $status = "pending"; // Default status is pending for admin approval
     
+        if (filter_var($raw_calories, FILTER_VALIDATE_INT) === false || $raw_calories < 0 || $raw_calories > 10000) {
+        $share_message = "Invalid calorie amount. Please enter a value between 0 and 10,000.";
+        $uploadOk = 0; 
+    } else {
+        $calories = (int)$raw_calories;
+    }
+
     $target_dir = "uploads/meals/";
     if (!file_exists($target_dir)) {
-        mkdir($target_dir, 0777, true);
+        mkdir($target_dir, 0755, true);
     }
     
     $file_extension = strtolower(pathinfo($_FILES["meal_image"]["name"], PATHINFO_EXTENSION));
     $new_filename = uniqid() . "." . $file_extension;
     $target_file = $target_dir . $new_filename;
     
-    $uploadOk = 1;
-    
-    // Check file size
-    if ($_FILES["meal_image"]["size"] > 5000000) { // 5MB max
-        $share_message = "Sorry, your file is too large.";
+    // Check if file was uploaded
+    if(!isset($_FILES["meal_image"]) || $_FILES["meal_image"]["error"] !== UPLOAD_ERR_OK) {
+        $share_message = "No file uploaded or upload error occurred.";
         $uploadOk = 0;
     }
     
-    // Allow certain file formats
-    if($file_extension != "jpg" && $file_extension != "png" && $file_extension != "jpeg") {
-        $share_message = "Sorry, only JPG, JPEG, PNG files are allowed.";
+    // Validate MIME type
+    if ($uploadOk == 1) {
+        $allowed_mime_types = ['image/jpeg', 'image/png'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES["meal_image"]["tmp_name"]);
+        finfo_close($finfo);
+        
+        if (!in_array($mime_type, $allowed_mime_types)) {
+            $share_message = "Invalid file type. Only JPG, JPEG, PNG images are allowed.";
+            $uploadOk = 0;
+        }
+    }
+    
+    // Check if image file is an actual image using getimagesize
+    if ($uploadOk == 1) {
+        $check = getimagesize($_FILES["meal_image"]["tmp_name"]);
+        if($check === false) {
+            $share_message = "File is not a valid image.";
+            $uploadOk = 0;
+        }
+    }
+    
+    // Check file size (5MB max)
+    if ($uploadOk == 1 && $_FILES["meal_image"]["size"] > 5000000) {
+        $share_message = "Sorry, your file is too large. Maximum size is 5MB.";
         $uploadOk = 0;
+    }
+    
+    // Allow certain file formats (case-insensitive)
+    if ($uploadOk == 1) {
+        $allowed_extensions = ['jpg', 'jpeg', 'png'];
+        if (!in_array($file_extension, $allowed_extensions)) {
+            $share_message = "Sorry, only JPG, JPEG, PNG files are allowed.";
+            $uploadOk = 0;
+        }
     }
     
     // Check if $uploadOk is set to 0 by an error
@@ -199,6 +237,7 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Community | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -343,6 +382,8 @@ $conn->close();
                     <input type="file" id="meal_image" name="meal_image" accept=".jpg, .jpeg, .png" required>
                     <p class="file-help">Max size: 5MB. Only JPG, JPEG, PNG files allowed.</p>
                 </div>
+
+                <?php echo csrf_field(); ?>
                 
                 <div class="form-actions">
                     <button type="button" id="cancelShare" class="btn btn-cancel">Cancel</button>

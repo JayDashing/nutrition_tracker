@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Redirect if user is not logged in or not an admin
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
@@ -7,8 +7,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Database connection
-require_once 'db.php';
+verify_csrf();
 
 // Handle approval/rejection actions
 $status_message = "";
@@ -86,6 +85,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Progress Approval | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -191,6 +191,7 @@ $conn->close();
                         <?php if ($post['status'] == 'pending'): ?>
                             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class="approval-form">
                                 <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+                                <?php echo csrf_field(); ?>
                                 <button type="submit" name="approve_post" class="btn btn-approve">
                                     <i class='bx bx-check'></i> Approve
                                 </button>
@@ -211,6 +212,7 @@ $conn->close();
                                         <option value="Not related to nutrition or fitness.">Unrelated to topic</option>
                                         <option value="Contains promotional content.">Promotional content</option>
                                     </select>
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" name="reject_post" class="btn btn-reject-confirm">
                                         <i class='bx bx-x'></i> Confirm Rejection
                                     </button>
@@ -220,6 +222,7 @@ $conn->close();
                             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                                 <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
                                 <input type="hidden" name="rejection_reason" value="Post approval reversed.">
+                                <?php echo csrf_field(); ?>
                                 <button type="submit" name="reject_post" class="btn btn-reverse">
                                     <i class='bx bx-revision'></i> Reverse Approval
                                 </button>
@@ -227,6 +230,7 @@ $conn->close();
                         <?php elseif ($post['status'] == 'rejected'): ?>
                             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                                 <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+                                <?php echo csrf_field(); ?>
                                 <button type="submit" name="approve_post" class="btn btn-reverse">
                                     <i class='bx bx-revision'></i> Reverse Rejection
                                 </button>

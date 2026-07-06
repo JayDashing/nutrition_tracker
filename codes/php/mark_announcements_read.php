@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Make sure user is logged in
 if (!isset($_SESSION['username'])) {
@@ -8,10 +8,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+verify_csrf();
 
-// Database connection
-require_once 'db.php';
+$username = $_SESSION['username'];
 
 // Get all announcement IDs
 $announcements_query = "SELECT id FROM announcements";

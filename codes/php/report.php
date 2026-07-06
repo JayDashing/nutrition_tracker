@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,10 +7,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+verify_csrf();
 
-//Database connection
-require_once 'db.php';
+$username = $_SESSION['username'];
 
 // Handle feedback submission
 $feedback_message = "";
@@ -43,6 +42,7 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Reports | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -73,6 +73,7 @@ $conn->close();
                 <label for="feedback">Your suggestions or concerns about the website:</label>
                 <textarea id="feedback" name="feedback" rows="5" required></textarea>
             </div>
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn submit-btn">Submit Feedback</button>
         </form>
     </div>

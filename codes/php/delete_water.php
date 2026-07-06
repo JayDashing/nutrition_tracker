@@ -1,5 +1,9 @@
 <?php
-session_start();
+require_once 'init.php';
+
+header('Content-Type: application/json');
+
+verify_csrf();
 
 // Check if user is logged in
 if (!isset($_SESSION['username'])) {
@@ -7,20 +11,17 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Get username
-$username = $_SESSION['username'];
-
-// Database connection
-$servername = "localhost";
-$db_username = "root";
-$password = "";
-$database = "nutrack_db";
-
-$conn = new mysqli($servername, $db_username, $password, $database);
-if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method. Must be POST.']);
     exit();
 }
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    echo json_encode(['success' => false, 'message' => 'Security token invalid or expired.']);
+    exit();
+}
+
+// Get username
+$username = $_SESSION['username'];
 
 // Check if there's a water entry for today
 $check_sql = "SELECT id, glasses FROM water_intake WHERE username = ? AND DATE(created_at) = CURDATE()";
@@ -31,7 +32,6 @@ $result = $check_stmt->get_result();
 
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    $current_glasses = $row['id'];
     
     // If already at 0, don't do anything
     if ($row['glasses'] <= 0) {

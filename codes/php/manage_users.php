@@ -1,7 +1,5 @@
 <?php
-// manage_users.php
-
-session_start();
+require_once 'init.php';
 
 // Redirect if not admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -9,44 +7,69 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-require_once 'db.php';
+verify_csrf();
 
 // Initialize search and sort parameters
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'id';
-$order = isset($_GET['order']) ? $_GET['order'] : 'ASC';
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$sort = $_GET['sort'] ?? 'id';
+$order = $_GET['order'] ?? 'ASC';
+
+$allowed_sort = ['id', 'username', 'email', 'role'];
+$allowed_order = ['ASC', 'DESC'];
+
+if (!in_array($sort, $allowed_sort)) {
+    $sort = 'id';
+}
+
+if (!in_array($order, $allowed_order)) {
+    $order = 'ASC';
+}
 
 // Handle delete user action
-if (isset($_GET['delete'])) {
-    $user_id = intval($_GET['delete']);
-    
-    // Check if user is an admin before deleting
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("CSRF attack detected");
+    }
+
+    $user_id = intval($_POST['delete']);
+
+    /* Prevent deleting yourself */
+    if ($user_id == $_SESSION['user_id']) {
+        $_SESSION['message'] = "You cannot delete your own account!";
+        $_SESSION['message_type'] = "error";
+        header("Location: manage_users.php");
+        exit();
+    }
+
+    /* Check role */
     $check_stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");
     $check_stmt->bind_param("i", $user_id);
     $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
-    $user_data = $check_result->fetch_assoc();
+    $result = $check_stmt->get_result();
+    $user = $result->fetch_assoc();
     $check_stmt->close();
-    
-    // Only proceed with deletion if the user is not an admin
-    if ($user_data && $user_data['role'] !== 'admin') {
+
+    if ($user && $user['role'] !== 'admin') {
+
         $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $stmt->close();
-        
-        // Set success message in session
+
         $_SESSION['message'] = "User deleted successfully!";
         $_SESSION['message_type'] = "success";
+
     } else {
-        // Set error message in session
+
         $_SESSION['message'] = "Admin users cannot be deleted!";
         $_SESSION['message_type'] = "error";
     }
-    
+
     header("Location: manage_users.php");
     exit();
 }
+
 
 // Prepare query with search and sort
 $query = "SELECT id, username, email, role FROM users";
@@ -69,6 +92,7 @@ $total_regular_users = $total_users - $total_admins;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>User Management | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -155,10 +179,13 @@ $total_regular_users = $total_users - $total_admins;
                     </td>
                     <td class="action-btns">
                         <?php if ($row['role'] !== 'admin'): ?>
-                            <a href="?delete=<?php echo $row['id']; ?>" class="btn action-btn danger-btn" title="Delete User" 
-                               onclick="return confirm('Are you sure you want to delete this user?');">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
+                            <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                <?php echo csrf_field(); ?>
+                                <input type="hidden" name="delete" value="<?php echo $row['id']; ?>">
+                                <button type="submit" class="btn action-btn danger-btn" title="Delete User">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
                         <?php else: ?>
                             <span class="btn action-btn disabled-btn" title="Admin users cannot be deleted">
                             <i class="fas fa-lock" style="color: grey;"></i>

@@ -3,6 +3,9 @@
         "phpmailer/phpmailer": "^6.9",
         "psr/log": "^3.0",
         "league/oauth2-client": "^2.8",
-        "clarifai/clarifai-php-grpc": "^11.2"
+        "clarifai/clarifai-php-grpc": "^11.2",
+        "vlucas/phpdotenv": "^5.6",
+        "ralouphie/getallheaders": "^3.0",
+        "bjeavons/zxcvbn-php": "^1.4"
     }
 }

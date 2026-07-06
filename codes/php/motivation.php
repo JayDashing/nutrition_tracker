@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 //Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,10 +7,9 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+verify_csrf();
 
-//Database connection
-require_once 'db.php';
+$username = $_SESSION['username'];
 
 //Get user's meal count and total calories
 $meal_query = "SELECT COUNT(*) as meal_count, SUM(calories) as total_calories FROM meals WHERE username = ?";
@@ -35,23 +34,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['share_progress'])) {
         
         // Create directory if it doesn't exist
         if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
+            mkdir($target_dir, 0755, true);
         }
         
-        $file_extension = pathinfo($_FILES["progress_image"]["name"], PATHINFO_EXTENSION);
+        $file_extension = strtolower(pathinfo($_FILES["progress_image"]["name"], PATHINFO_EXTENSION));
         $new_filename = uniqid() . "." . $file_extension;
         $target_file = $target_dir . $new_filename;
         
-        // Check file type
-        $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
-        if (in_array(strtolower($file_extension), $allowed_types)) {
-            if (move_uploaded_file($_FILES["progress_image"]["tmp_name"], $target_file)) {
-                $image_path = $target_file;
-            } else {
-                $upload_message = "Sorry, there was an error uploading your file.";
+        $uploadOk = 1;
+        
+        // Validate MIME type
+        $allowed_mime_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES["progress_image"]["tmp_name"]);
+        finfo_close($finfo);
+        
+        if (!in_array($mime_type, $allowed_mime_types)) {
+            $upload_message = "Invalid file type. Only JPG, PNG & GIF images are allowed.";
+            $uploadOk = 0;
+        }
+        
+        // Check if image file is an actual image using getimagesize
+        if ($uploadOk == 1) {
+            $check = getimagesize($_FILES["progress_image"]["tmp_name"]);
+            if($check === false) {
+                $upload_message = "File is not a valid image.";
+                $uploadOk = 0;
             }
-        } else {
-            $upload_message = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+        }
+        
+        // Check file size (5MB max)
+        if ($uploadOk == 1 && $_FILES["progress_image"]["size"] > 5000000) {
+            $upload_message = "Sorry, your file is too large. Maximum size is 5MB.";
+            $uploadOk = 0;
+        }
+        
+        // Check file type (case-insensitive)
+        if ($uploadOk == 1) {
+            $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
+            if (in_array($file_extension, $allowed_types)) {
+                if (move_uploaded_file($_FILES["progress_image"]["tmp_name"], $target_file)) {
+                    $image_path = $target_file;
+                } else {
+                    $upload_message = "Sorry, there was an error uploading your file.";
+                }
+            } else {
+                $upload_message = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+            }
         }
     }
     
@@ -140,6 +169,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Motivation | NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -211,7 +241,7 @@ $conn->close();
                 <label for="progress_description"><i class='bx bx-message-detail'></i> <strong>Share your journey</strong></label>
                 <textarea id="progress_description" name="progress_description" rows="4" placeholder="Tell us about your nutrition journey, goals, challenges, or achievements..." required></textarea>
             </div>
-            
+            <?php echo csrf_field(); ?>
             <button type="submit" name="share_progress" class="btn btn-share">Share My Progress</button>
         </form>
         

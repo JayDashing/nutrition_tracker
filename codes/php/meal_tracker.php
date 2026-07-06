@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'init.php';
 
 // Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -7,11 +7,10 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Logged-in user's name
+verify_csrf();
+
 $username = $_SESSION['username'];
 
-// Database connection
-require_once 'db.php';
 
 // Meal deletion
 if (isset($_GET['delete_id'])) {
@@ -62,95 +61,6 @@ if (isset($_POST['add_custom_food'])) {
         $error_message = "Error adding custom food: " . $conn->error;
     }
     $stmt->close();
-}
-
-/**
- * Get nutrition information from Nutritionix API
- * 
- * @param string $query The food/meal query (e.g. "2 eggs with toast")
- * @return array|false Returns nutrition data or false on failure
- */
-function getNutritionInfo($query) {
-    // Nutritionix API credentials
-    $app_id = "14be65b6";
-    $app_key = "013362f3a3c7bcada7df574cb2fadf81";
-    
-    // API endpoint for natural language processing
-    $endpoint = "https://trackapi.nutritionix.com/v2/natural/nutrients";
-    
-    // Prepare the request
-    $data = json_encode([
-        'query' => $query,
-        'timezone' => 'Pacific', // Adjust as needed
-    ]);
-    
-    // Initialize cURL session
-    $ch = curl_init($endpoint);
-    
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'x-app-id: ' . $app_id,
-        'x-app-key: ' . $app_key,
-        'x-remote-user-id: 0' // 0 for development
-    ]);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    
-    // Execute cURL request
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    // Close cURL session
-    curl_close($ch);
-    
-    // Check if request was successful
-    if ($http_code === 200) {
-        return json_decode($response, true);
-    } else {
-        error_log("Nutritionix API error: " . $response);
-        return false;
-    }
-}
-
-// Function to extract and format nutrition data from API response
-function extractNutritionData($apiResponse) {
-    if (!$apiResponse || !isset($apiResponse['foods']) || empty($apiResponse['foods'])) {
-        return false;
-    }
-    
-    $result = [
-        'foods' => [],
-        'totals' => [
-            'calories' => 0,
-            'protein' => 0,
-            'carbs' => 0,
-            'fat' => 0
-        ]
-    ];
-    
-    foreach ($apiResponse['foods'] as $food) {
-        $foodItem = [
-            'name' => $food['food_name'],
-            'quantity' => $food['serving_qty'],
-            'unit' => $food['serving_unit'],
-            'calories' => round($food['nf_calories']),
-            'protein' => round($food['nf_protein'], 1),
-            'carbs' => round($food['nf_total_carbohydrate'], 1),
-            'fat' => round($food['nf_total_fat'], 1)
-        ];
-        
-        $result['foods'][] = $foodItem;
-        
-        // Add to totals
-        $result['totals']['calories'] += $foodItem['calories'];
-        $result['totals']['protein'] += $foodItem['protein'];
-        $result['totals']['carbs'] += $foodItem['carbs'];
-        $result['totals']['fat'] += $foodItem['fat'];
-    }
-    
-    return $result;
 }
 
 // Convert different units to grams for calculation
@@ -239,6 +149,7 @@ $stmt->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Track Your Meals | NutriTrack</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/meal_trackers.css">
@@ -259,7 +170,6 @@ $stmt->close();
     <div class="tab active" data-tab="quick-add">Quick Add</div>
     <div class="tab" data-tab="food-database">Food Database</div>
     <div class="tab" data-tab="custom-food">Add Custom Food</div>
-    <div class="tab" data-tab="meal-search">Search by Meal</div>
 </div>
     
     <!-- Quick Add Tab -->
@@ -280,6 +190,7 @@ $stmt->close();
                 </select>
             </div>
             <input type="hidden" name="food_id" value="0">
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn">Add Meal</button>
         </form>
     </div>
@@ -344,6 +255,7 @@ $stmt->close();
                 <input type="hidden" name="meal_name" id="foodName">
                 <input type="hidden" name="calories" id="calculatedCalories">
                 <input type="hidden" name="food_id" id="foodId">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn">Add to Journal</button>
             </form>
         </div>
@@ -366,84 +278,12 @@ $stmt->close();
                     <input type="number" name="custom_fat" placeholder="Fat (g) per 100g" step="0.1" min="0" required>
                 </div>
                 <input type="hidden" name="add_custom_food" value="1">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn">Add Custom Food</button>
             </form>
         </div>
     </div>
 
-    <div class="tab-content" id="meal-search">
-    <div class="meal-search-container">
-        <form method="POST" action="" id="mealSearchForm">
-            <div class="search-input-container">
-                <input type="text" name="meal_query" id="mealQueryInput" placeholder="(e.g., '2 eggs with toast and coffee')" required>
-                <button type="submit" name="search_meal" class="btn" style="margin-top: 10px;">Search</button>
-            </div>
-        </form>
-        
-        <?php
-        // Process the meal search
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_meal'])) {
-            $meal_query = $_POST['meal_query'];
-            $nutrition_data = getNutritionInfo($meal_query);
-            $formatted_data = extractNutritionData($nutrition_data);
-            
-            if ($formatted_data) {
-                ?>
-                <div class="meal-search-results">
-                    <h3>Results for "<?php echo htmlspecialchars($meal_query); ?>"</h3>
-                    
-                    <div class="nutrition-summary">
-                        <div class="nutrient-grid">
-                            <div class="nutrient-box">
-                                <div class="nutrient-value"><?php echo $formatted_data['totals']['calories']; ?></div>
-                                <div class="nutrient-label">Calories</div>
-                            </div>
-                            <div class="nutrient-box">
-                                <div class="nutrient-value"><?php echo $formatted_data['totals']['protein']; ?>g</div>
-                                <div class="nutrient-label">Protein</div>
-                            </div>
-                            <div class="nutrient-box">
-                                <div class="nutrient-value"><?php echo $formatted_data['totals']['carbs']; ?>g</div>
-                                <div class="nutrient-label">Carbs</div>
-                            </div>
-                            <div class="nutrient-box">
-                                <div class="nutrient-value"><?php echo $formatted_data['totals']['fat']; ?>g</div>
-                                <div class="nutrient-label">Fat</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="found-foods">
-                     <h4>Foods Found:</h4>
-                    <div class="foods-container">
-                          <?php foreach ($formatted_data['foods'] as $food): ?>
-                         <div class="food-item-result">
-                          <span class="food-name"><?php echo htmlspecialchars($food['name']); ?></span>
-                          <span class="food-quantity"><?php echo $food['quantity'] . ' ' . $food['unit']; ?></span>
-                         <span class="food-calories"><?php echo $food['calories']; ?> kcal</span>
-                        </div>
-                      <?php endforeach; ?>
-                      </div>
-                    </div>
-                    
-                    <form method="POST" action="">
-                        <input type="hidden" name="meal_name" value="<?php echo htmlspecialchars($meal_query); ?>">
-                        <input type="hidden" name="calories" value="<?php echo $formatted_data['totals']['calories']; ?>">
-                        <input type="hidden" name="portion_size" value="1">
-                        <input type="hidden" name="portion_unit" value="serving">
-                        <input type="hidden" name="food_id" value="0">
-                        <button type="submit" class="btn">Add to Journal</button>
-                    </form>
-                </div>
-                <?php
-            } else {
-                echo '<div class="error-message">Sorry, could not find nutrition information for that meal. Try being more specific or use different keywords.</div>';
-            }
-        }
-        ?>
-    </div>
-</div>
-    
     <div class="nutrition-journal">
         <div class="journal-header">
             <h2>Nutrition Journal</h2>

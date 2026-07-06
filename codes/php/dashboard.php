@@ -1,12 +1,13 @@
 <?php
-session_start();
+require_once 'init.php';
+
 // Check if admin is logged in
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     header("Location: logreg.php");
     exit();
 }
-// Connect to the database
-require_once 'db.php';
+
+verify_csrf();
 
 // Update last_login for the current user
 $current_user = $_SESSION['username'];
@@ -74,6 +75,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>NutriTrack | Admin</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

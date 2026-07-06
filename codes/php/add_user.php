@@ -1,30 +1,36 @@
 <?php
-session_start();
-
+require_once 'init.php';
 // Redirect if not admin
 if ($_SESSION['role'] !== 'admin') {
     header("Location: home.php");
     exit();
 }
 
-require_once 'db.php';
+verify_csrf();
 
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $password = $_POST['password'];
     $role = $_POST['role'];
 
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $username, $email, $password, $role);
-
-    if ($stmt->execute()) {
-        $message = "User added successfully!";
+    // Validate password
+    if (strlen($password) < 8 || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^\w]/', $password)) {
+        $message = "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
     } else {
-        $message = "Error: " . $stmt->error;
+        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $username, $email, $hashed_password, $role);
+
+        if ($stmt->execute()) {
+            $message = "User added successfully!";
+        } else {
+            $message = "Error: " . $stmt->error;
+        }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 $conn->close();
@@ -34,6 +40,7 @@ $conn->close();
 <html lang="en">
 
 <head>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <title>Add User - NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/nutrition_tracker/codes/css/add_user.css">
@@ -59,7 +66,9 @@ $conn->close();
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required
+                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w]).{8,}" 
+                    title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.">
             </div>
 
             <div class="form-group">
@@ -69,7 +78,8 @@ $conn->close();
                     <option value="admin">Admin</option>
                 </select>
             </div>
-
+            
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn">Add User</button>
         </form>
 

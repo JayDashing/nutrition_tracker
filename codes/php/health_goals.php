@@ -1,16 +1,14 @@
 <?php
-session_start();
-
+require_once 'init.php';
 // Redirect if user is not logged in
 if (!isset($_SESSION['username'])) {
     header("Location: logreg.php");
     exit();
 }
+ 
+verify_csrf();
 
 $username = $_SESSION['username'];
-
-// Database connection
-require_once 'db.php';
 
 // Goal submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['goal_amount'], $_POST['goal_name'])) {
@@ -188,6 +186,7 @@ $has_daily_goal = count($daily_goals) > 0;
             <input type="text" name="goal_name" placeholder="Goal Name (e.g., Weight Loss, Maintenance)" required>
             <input type="number" name="goal_amount" placeholder="Daily Calorie Target" required>
         </div>
+        <?php echo csrf_field(); ?>
         <button type="submit" class="btn">
             <?php echo $has_daily_goal ? 'Update Calorie Goal' : 'Set Calorie Goal'; ?>
         </button>
@@ -235,6 +234,7 @@ $has_daily_goal = count($daily_goals) > 0;
                                 
                                 <form method="POST" class="delete-form">
                                     <input type="hidden" name="delete_goal" value="<?php echo $goal['id']; ?>">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn-delete"><i class='bx bx-trash'></i></button>
                                 </form>
                             </div>
