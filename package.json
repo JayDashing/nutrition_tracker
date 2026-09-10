@@ -18,7 +18,7 @@
     "nodemailer": "^6.9.7",
     "zxcvbn": "^4.4.2",
     "jsonwebtoken": "^9.0.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.3.0",
     "axios": "^1.6.2"
   },
   "engines": {
